@@ -1,11 +1,13 @@
 import * as assert from "assert"
 import express from "express"
+import asyncHandler from "express-async-handler"
 import nodeFetch from "node-fetch"
 // @ts-ignore
 import fetchCookie from "fetch-cookie"
 import { promisify } from "util"
 import { AddressInfo } from "net"
 import http from "http"
+import bodyParser = require("body-parser")
 
 class Character<UserAgent, UserInfo> {
   private userAgent: UserAgent
@@ -149,22 +151,40 @@ class TestDomainApi {
 }
 
 describe('dollshouse', () => {
-  it('runs through domain user agent', async () => {
-    const testDomainApi = new TestDomainApi()
+  let TestHouse: DollshouseConstructor<TestUserAgent, TestUserInfo>
+  let house: Dollshouse<TestUserAgent, TestUserInfo>
+  let testDomainApi: TestDomainApi
+
+  beforeEach(async () => {
+    testDomainApi = new TestDomainApi()
+
     const options: DollshouseOptions<TestDomainApi, TestUserAgent, TestUserInfo> = {
       makeDomainApi: () => testDomainApi,
       makeDomainUserAgent: (domainApi: TestDomainApi, userInfo: TestUserInfo) => new TestDomainUserAgent(domainApi, userInfo),
-      makeHttpUserAgent: (baseUrl: string) => {
-        throw new Error("Unexpected")
-      },
-      makeHttpServer: (domainApi: TestDomainApi) => {
-        throw new Error("Unexpected")
+      makeHttpUserAgent: (baseUrl: string) => new TestHttpUserAgent(baseUrl, {fetch: fetchCookie(nodeFetch)}),
+      makeHttpServer: async (domainApi: TestDomainApi) => {
+        const app = express()
+        app.use(bodyParser.json())
+        app.post("/projects", asyncHandler(async (req, res) => {
+          const {projectName} = req.body
+          const userInfo: TestUserInfo = undefined
+          const userAgent = new TestDomainUserAgent(domainApi, userInfo)
+          await userAgent.createProject(projectName)
+          res.end()
+        }))
+        return http.createServer(app)
       }
     }
-    const TestHouse = dollshouse(options)
-    const house = new TestHouse(false)
-    await house.start()
+    TestHouse = dollshouse(options)
+  })
 
+  afterEach(async () => {
+    await house.stop()
+  })
+
+  it('runs through domain user agent', async () => {
+    house = new TestHouse(false)
+    await house.start()
     const aslak = await house.getCharacter('aslak')
     await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
       await userAgent.createProject('Test Project')
@@ -175,19 +195,7 @@ describe('dollshouse', () => {
   })
 
   it('runs through http user agent', async () => {
-    const testDomainApi = new TestDomainApi()
-
-    const options: DollshouseOptions<TestDomainApi, TestUserAgent, TestUserInfo> = {
-      makeDomainApi: () => testDomainApi,
-      makeDomainUserAgent: (domainApi: TestDomainApi, userInfo: TestUserInfo) => new TestDomainUserAgent(domainApi, userInfo),
-      makeHttpUserAgent: (baseUrl: string) => new TestHttpUserAgent(baseUrl, {fetch: fetchCookie(nodeFetch)}),
-      makeHttpServer: async (domainApi: TestDomainApi) => {
-        const app = express()
-        return http.createServer(app)
-      }
-    }
-    const TestHouse = dollshouse(options)
-    const house = new TestHouse(true)
+    house = new TestHouse(true)
     await house.start()
 
     const aslak = await house.getCharacter('aslak')
