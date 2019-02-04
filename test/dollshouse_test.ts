@@ -2,7 +2,8 @@ import * as assert from "assert"
 import express from "express"
 import expressSession, { MemoryStore, Store } from "express-session"
 import asyncHandler from "express-async-handler"
-import cookie from "cookie"
+import nanoid from 'nanoid'
+import { serialize } from "cookie"
 import signature from "cookie-signature"
 import nodeFetch from "node-fetch"
 // @ts-ignore
@@ -17,7 +18,6 @@ class Character<UserAgent, UserInfo> {
   private _userInfo: UserInfo
 
   constructor(private readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => UserAgent) {
-
   }
 
   set userInfo(userInfo: UserInfo) {
@@ -35,9 +35,11 @@ class Character<UserAgent, UserInfo> {
 interface DollshouseOptions<DomainApi, UserAgent, UserInfo> {
   makeDomainApi: () => DomainApi,
   makeDomainUserAgent: (domainApi: DomainApi, userInfo: UserInfo) => UserAgent
-  makeHttpUserAgent: (baseUrl: string) => UserAgent
-  makeHttpServer: (domainApi: DomainApi, sessionStore: Store | MemoryStore) => Promise<http.Server>
+  makeHttpUserAgent: (baseUrl: string, cookie: string) => UserAgent
+  makeHttpServer: (domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) => Promise<http.Server>
+  sessionCookieName: string,
   makeSessionStore: () => Store | MemoryStore
+  sessionSecret: string
 }
 
 interface DollshouseConstructor<UserAgent, UserInfo> {
@@ -71,7 +73,7 @@ function dollshouse<DomainApi, UserAgent, UserInfo>(options: DollshouseOptions<D
 
       if (this.isHttp) {
         this.sessionStore = options.makeSessionStore()
-        const server = await options.makeHttpServer(this.domainApi, this.sessionStore)
+        const server = await options.makeHttpServer(this.domainApi, options.sessionCookieName, this.sessionStore, options.sessionSecret)
         const listen = promisify(server.listen.bind(server))
         await listen()
         this.stoppables.push(async () => {
@@ -95,7 +97,25 @@ function dollshouse<DomainApi, UserAgent, UserInfo>(options: DollshouseOptions<D
 
       const makeUserAgent = (userInfo: UserInfo): UserAgent => {
         if (this.isHttp) {
-          return options.makeHttpUserAgent(this.baseUrl)
+          const cookie = {
+            originalMaxAge: 1000,
+            maxAge: 1000,
+            path: "/",
+            httpOnly: true,
+            expires: false,
+          }
+          const session = {
+            userInfo,
+            cookie
+          }
+
+          const sessionId = nanoid()
+          this.sessionStore.set(sessionId, session)
+
+          // See express-session setcookie/getcookie
+          const signed = 's:' + signature.sign(sessionId, options.sessionSecret)
+          const clientCookie = serialize(options.sessionCookieName, signed)
+          return options.makeHttpUserAgent(this.baseUrl, clientCookie)
         } else {
           return options.makeDomainUserAgent(this.domainApi, userInfo)
         }
@@ -125,19 +145,16 @@ class TestDomainUserAgent implements TestUserAgent {
 }
 
 class TestHttpUserAgent implements TestUserAgent {
-  constructor(private readonly baseUrl: string, private readonly fetcher: GlobalFetch) {
+  constructor(private readonly baseUrl: string, private readonly cookie: string, private readonly fetcher: GlobalFetch) {
   }
 
   async createProject(projectName: string) {
     const headers: HeadersInit = {
       "Content-Type": "application/json"
     }
-
-    // TODO: Pass in as cookie ctor arg
-    const name = "connect.sid"
-    const secret = "keyboard cat"
-    const signed = 's:' + signature.sign("my-session-id", secret)
-    headers["Cookie"] = cookie.serialize(name, signed)
+    if (this.cookie) {
+      headers["Cookie"] = this.cookie
+    }
 
     const res = await this.fetcher.fetch(`${this.baseUrl}/projects`, {
       method: "POST",
@@ -177,31 +194,16 @@ describe('dollshouse', () => {
     const options: DollshouseOptions<TestDomainApi, TestUserAgent, TestUserInfo> = {
       makeDomainApi: () => testDomainApi,
       makeDomainUserAgent: (domainApi: TestDomainApi, userInfo: TestUserInfo) => new TestDomainUserAgent(domainApi, userInfo),
-      makeHttpUserAgent: (baseUrl: string) => new TestHttpUserAgent(baseUrl, {fetch: fetchCookie(nodeFetch)}),
-      makeHttpServer: async (domainApi: TestDomainApi, sessionStore: MemoryStore) => {
+      makeHttpUserAgent: (baseUrl: string, cookie: string) => new TestHttpUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
+      makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) => {
         const app = express()
         app.use(expressSession({
-          secret: "keyboard cat",
+          name: sessionCookieName,
+          secret: sessionSecret,
           store: sessionStore,
           resave: true,
           saveUninitialized: true,
         }))
-
-        const cookie = {
-          originalMaxAge: 1000,
-          maxAge: 1000,
-          path: "/",
-          httpOnly: true,
-          expires: false,
-        }
-        const session = {
-          userInfo: {
-            userId: 'id-aslak'
-          },
-          cookie
-        }
-        sessionStore.set('my-session-id', session)
-
         app.use(bodyParser.json())
         app.post("/projects", asyncHandler(async (req, res) => {
           const {projectName} = req.body
@@ -212,9 +214,11 @@ describe('dollshouse', () => {
         }))
         return http.createServer(app)
       },
+      sessionCookieName: 'session-id',
       makeSessionStore(): MemoryStore {
         return new MemoryStore()
-      }
+      },
+      sessionSecret: 'keyboard cat'
     }
     TestHouse = dollshouse(options)
   })
@@ -223,30 +227,24 @@ describe('dollshouse', () => {
     await house.stop()
   })
 
-  it('runs through domain user agent', async () => {
-    house = new TestHouse(false)
-    await house.start()
-    const aslak = await house.getCharacter('aslak')
-    aslak.userInfo = {userId: 'id-aslak'}
-    await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
-      await userAgent.createProject('Test Project')
-      return userAgent
+  const configs = [true, false]
+  configs.forEach((isHttp: boolean) => {
+    const name = isHttp ? 'http-domain' : 'domain'
+    it(`runs through ${name}`, async () => {
+      house = new TestHouse(isHttp)
+      await house.start()
+      const aslak = await house.getCharacter('aslak')
+      aslak.userInfo = {userId: 'id-aslak-123'}
+      await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
+        await userAgent.createProject('Test Project')
+        return userAgent
+      })
+
+      assert.deepStrictEqual(testDomainApi.messages[0], {
+        userInfo: {userId: 'id-aslak-123'},
+        projectName: 'Test Project'
+      })
     })
 
-    assert.deepStrictEqual(testDomainApi.messages[0], {userInfo: {userId: 'id-aslak'}, projectName: 'Test Project'})
-  })
-
-  it('runs through http user agent', async () => {
-    house = new TestHouse(true)
-    await house.start()
-
-    const aslak = await house.getCharacter('aslak')
-    aslak.userInfo = {userId: 'id-aslak'}
-    await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
-      await userAgent.createProject('Test Project')
-      return userAgent
-    })
-
-    assert.deepStrictEqual(testDomainApi.messages[0], {userInfo: {userId: 'id-aslak'}, projectName: 'Test Project'})
   })
 })
