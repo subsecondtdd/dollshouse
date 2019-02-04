@@ -36,5 +36,11 @@
     "ts-node": "^8.0.2",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"
+  },
+  "dependencies": {
+    "@types/cookie": "^0.3.2",
+    "@types/cookie-signature": "^1.0.1",
+    "cookie": "^0.3.1",
+    "cookie-signature": "^1.1.0"
   }
 }
