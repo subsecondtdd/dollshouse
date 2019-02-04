@@ -230,18 +230,20 @@ describe('dollshouse', () => {
   const configs = [true, false]
   configs.forEach((isHttp: boolean) => {
     const name = isHttp ? 'http-domain' : 'domain'
+
     it(`runs through ${name}`, async () => {
       house = new TestHouse(isHttp)
       await house.start()
       const aslak = await house.getCharacter('aslak')
-      aslak.userInfo = {userId: 'id-aslak-123'}
+      const userInfo = {userId: 'id-aslak-123'}
+      aslak.userInfo = userInfo
       await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
         await userAgent.createProject('Test Project')
         return userAgent
       })
 
       assert.deepStrictEqual(testDomainApi.messages[0], {
-        userInfo: {userId: 'id-aslak-123'},
+        userInfo,
         projectName: 'Test Project'
       })
     })
