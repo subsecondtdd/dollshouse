@@ -8,20 +8,11 @@ import fetchCookie from "fetch-cookie"
 import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
 import bodyParser = require("body-parser")
-
-interface TestUserAgent {
-  createProject(projectName: string): Promise<TestUserAgent>
-}
-
-class TestDomainUserAgent implements TestUserAgent {
-  constructor(private readonly domainApi: TestDomainApi, private readonly userInfo: TestUserInfo) {
-  }
-
-  async createProject(projectName: string) {
-    await this.domainApi.createProject(this.userInfo, projectName)
-    return this
-  }
-}
+import TestUserAgent from "./TestUserAgent"
+import TestUserInfo from "./TestUserInfo"
+import TestDomainUserAgent from "./TestDomainUserAgent"
+import DomTestUserAgent from "./DomTestUserAgent"
+import TestDomainApi from "./TestDomainApi"
 
 class TestHttpUserAgent implements TestUserAgent {
   constructor(private readonly baseUrl: string, private readonly cookie: string, private readonly fetcher: GlobalFetch) {
@@ -50,18 +41,6 @@ class TestHttpUserAgent implements TestUserAgent {
   }
 }
 
-interface TestUserInfo {
-
-}
-
-class TestDomainApi {
-  messages: Array<{ userInfo: TestUserInfo, projectName: string }> = []
-
-  createProject(userInfo: TestUserInfo, projectName: string) {
-    this.messages.push({userInfo, projectName})
-  }
-}
-
 describe('dollshouse', () => {
   let TestHouse: DollshouseConstructor<TestUserInfo, TestUserAgent>
   let house: Dollshouse<TestUserInfo, TestUserAgent>
@@ -74,6 +53,7 @@ describe('dollshouse', () => {
       makeDomainApi: () => testDomainApi,
       makeDomainUserAgent: (domainApi: TestDomainApi, userInfo: TestUserInfo) => new TestDomainUserAgent(domainApi, userInfo),
       makeHttpUserAgent: (baseUrl: string, cookie: string) => new TestHttpUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
+      makeDomUserAgent: ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestUserAgent($characterNode, userAgent),
       makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) => {
         const app = express()
         app.use(expressSession({
@@ -106,26 +86,37 @@ describe('dollshouse', () => {
     await house.stop()
   })
 
-  const configs = [true, false]
-  configs.forEach((isHttp: boolean) => {
-    const name = isHttp ? 'http-domain' : 'domain'
+  //                   dom   http
+  // dom-http-domain    t      t
+  // dom-domain         t      f
+  // http-domain        f      t
+  // domain             f      f
+  const domConfig = [false, true]
+  domConfig.forEach((isDom: boolean) => {
+    const httpConfig = [false, true]
+    httpConfig.forEach((isHttp: boolean) => {
+      const nameParts = []
+      if(isDom) {nameParts.push('dom')}
+      if(isHttp) {nameParts.push('http')}
+      {nameParts.push('domain')}
+      const name = nameParts.join('-')
 
-    it(`runs through ${name}`, async () => {
-      house = new TestHouse(isHttp)
-      await house.start()
-      const aslak = await house.getCharacter('aslak')
-      const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
-      aslak.userInfo = userInfo
-      await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
-        await userAgent.createProject('Test Project')
-        return userAgent
-      })
+      it(`runs through ${name}`, async () => {
+        house = new TestHouse(isDom, isHttp)
+        await house.start()
+        const aslak = await house.getCharacter('aslak')
+        const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
+        aslak.userInfo = userInfo
+        await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
+          await userAgent.createProject('Test Project')
+          return userAgent
+        })
 
-      assert.deepStrictEqual(testDomainApi.messages[0], {
-        userInfo,
-        projectName: 'Test Project'
+        assert.deepStrictEqual(testDomainApi.messages[0], {
+          userInfo,
+          projectName: 'Test Project'
+        })
       })
     })
-
   })
 })
