@@ -1,45 +1,18 @@
 import * as assert from "assert"
-import express from "express"
-import expressSession, { MemoryStore } from "express-session"
-import asyncHandler from "express-async-handler"
+import { MemoryStore } from "express-session"
 import nodeFetch from "node-fetch"
 // @ts-ignore
 import fetchCookie from "fetch-cookie"
 import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
-import bodyParser = require("body-parser")
 import TestUserAgent from "./TestUserAgent"
 import TestUserInfo from "./TestUserInfo"
-import TestDomainUserAgent from "./TestDomainUserAgent"
+import DomainTestUserAgent from "./DomainTestUserAgent"
 import DomTestUserAgent from "./DomTestUserAgent"
 import TestDomainApi from "./TestDomainApi"
-
-class TestHttpUserAgent implements TestUserAgent {
-  constructor(private readonly baseUrl: string, private readonly cookie: string, private readonly fetcher: GlobalFetch) {
-  }
-
-  async createProject(projectName: string) {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json"
-    }
-    if (this.cookie) {
-      headers["Cookie"] = this.cookie
-    }
-
-    const res = await this.fetcher.fetch(`${this.baseUrl}/projects`, {
-      method: "POST",
-      body: JSON.stringify({
-        projectName
-      }),
-      headers
-    })
-    if (!res.ok) {
-      const errorMessage = await res.text()
-      throw new Error(errorMessage)
-    }
-    return this
-  }
-}
+import HttpTestUserAgent from "./HttpTestUserAgent"
+import makeTestWebServer from "./makeTestWebServer"
+import Project from "./Project"
 
 describe('dollshouse', () => {
   let TestHouse: DollshouseConstructor<TestUserInfo, TestUserAgent>
@@ -51,28 +24,11 @@ describe('dollshouse', () => {
 
     const options: DollshouseOptions<TestDomainApi, TestUserInfo, TestUserAgent> = {
       makeDomainApi: () => testDomainApi,
-      makeDomainUserAgent: (domainApi: TestDomainApi, userInfo: TestUserInfo) => new TestDomainUserAgent(domainApi, userInfo),
-      makeHttpUserAgent: (baseUrl: string, cookie: string) => new TestHttpUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
-      makeDomUserAgent: ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestUserAgent($characterNode, userAgent),
-      makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) => {
-        const app = express()
-        app.use(expressSession({
-          name: sessionCookieName,
-          secret: sessionSecret,
-          store: sessionStore,
-          resave: true,
-          saveUninitialized: true,
-        }))
-        app.use(bodyParser.json())
-        app.post("/projects", asyncHandler(async (req, res) => {
-          const {projectName} = req.body
-          const userInfo: TestUserInfo = req.session.userInfo
-          const userAgent = new TestDomainUserAgent(domainApi, userInfo)
-          await userAgent.createProject(projectName)
-          res.end()
-        }))
-        return http.createServer(app)
-      },
+      makeDomainUserAgent: async (domainApi: TestDomainApi, userInfo: TestUserInfo) => new DomainTestUserAgent(domainApi, userInfo),
+      makeHttpUserAgent: async (baseUrl: string, cookie: string) => new HttpTestUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
+      makeDomUserAgent: async ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestUserAgent($characterNode, userAgent),
+      makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) =>
+        makeTestWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi),
       sessionCookieName: 'session-id',
       makeSessionStore(): MemoryStore {
         return new MemoryStore()
@@ -96,9 +52,15 @@ describe('dollshouse', () => {
     const httpConfig = [false, true]
     httpConfig.forEach((isHttp: boolean) => {
       const nameParts = []
-      if(isDom) {nameParts.push('dom')}
-      if(isHttp) {nameParts.push('http')}
-      {nameParts.push('domain')}
+      if (isDom) {
+        nameParts.push('dom')
+      }
+      if (isHttp) {
+        nameParts.push('http')
+      }
+      {
+        nameParts.push('domain')
+      }
       const name = nameParts.join('-')
 
       it(`runs through ${name}`, async () => {
@@ -112,10 +74,16 @@ describe('dollshouse', () => {
           return userAgent
         })
 
-        assert.deepStrictEqual(testDomainApi.messages[0], {
-          userInfo,
+        // TODO: Wait for version to synchronise
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        const expectedProjects: Project[] = [{
           projectName: 'Test Project'
-        })
+        }]
+        assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
+
+        const projects = await aslak.query((userAgent: TestUserAgent) => userAgent.getProjects())
+        assert.deepStrictEqual(projects, expectedProjects)
       })
     })
   })

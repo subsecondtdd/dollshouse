@@ -9,9 +9,9 @@ import { serialize } from "cookie"
 
 export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
   makeDomainApi: () => DomainApi,
-  makeDomainUserAgent: (domainApi: DomainApi, userInfo: UserInfo) => UserAgent
-  makeHttpUserAgent: (baseUrl: string, cookie: string) => UserAgent
-  makeDomUserAgent: ($characterNode: HTMLElement, userAgent: UserAgent) => UserAgent
+  makeDomainUserAgent: (domainApi: DomainApi, userInfo: UserInfo) => Promise<UserAgent>
+  makeHttpUserAgent: (baseUrl: string, cookie: string) => Promise<UserAgent>
+  makeDomUserAgent: ($characterNode: HTMLElement, userAgent: UserAgent) => Promise<UserAgent>
   makeHttpServer: (domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) => Promise<http.Server>
   sessionCookieName: string,
   makeSessionStore: () => Store | MemoryStore
@@ -71,11 +71,11 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
     async getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)
 
-      const makeHttpOrDomainUserAgent = (userInfo: UserInfo): UserAgent => {
+      const makeHttpOrDomainUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
         if (this.isHttp) {
           const cookie = {
-            originalMaxAge: 1000,
-            maxAge: 1000,
+            originalMaxAge: Number.MAX_SAFE_INTEGER,
+            maxAge: Number.MAX_SAFE_INTEGER,
             path: "/",
             httpOnly: true,
             expires: false,
@@ -97,8 +97,8 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
         }
       }
 
-      const makeUserAgent = (userInfo: UserInfo): UserAgent => {
-        const userAgent = makeHttpOrDomainUserAgent(userInfo)
+      const makeUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
+        const userAgent = await makeHttpOrDomainUserAgent(userInfo)
         if (this.isDom) {
           const $characterNode = this.makeCharacterNode(characterName, true)
           return options.makeDomUserAgent($characterNode, userAgent)

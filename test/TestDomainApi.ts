@@ -1,9 +1,16 @@
 import TestUserInfo from "./TestUserInfo"
+import Project from "./Project"
 
 export default class TestDomainApi {
-  messages: Array<{ userInfo: TestUserInfo, projectName: string }> = []
+  private projects: Project[] = []
 
   createProject(userInfo: TestUserInfo, projectName: string) {
-    this.messages.push({userInfo, projectName})
+    if (!userInfo) throw new Error('createProject not allowed')
+    this.projects.push({projectName})
+  }
+
+  getProjects(userInfo: TestUserInfo) {
+    if (!userInfo) throw new Error('getProjects not allowed')
+    return this.projects
   }
 }
