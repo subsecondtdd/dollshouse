@@ -39,14 +39,43 @@ var Character = /** @class */ (function () {
     function Character(name, makeUserAgent) {
         this.name = name;
         this.makeUserAgent = makeUserAgent;
+        this.memory = new Map();
     }
     Object.defineProperty(Character.prototype, "userInfo", {
+        /**
+         * Sets user info. This will be passed to the {@link makeUserAgent} function.
+         * This is typically used to asuthenticate the character's user agent.
+         *
+         * @param userInfo
+         */
         set: function (userInfo) {
             this._userInfo = userInfo;
         },
         enumerable: true,
         configurable: true
     });
+    /**
+     * Remember something
+     *
+     * @param key the name of the thing to remember
+     * @param value what to remember
+     */
+    Character.prototype.remember = function (key, value) {
+        this.memory.set(key, value);
+    };
+    /**
+     * Recall something previously remembered
+     *
+     * @param key the name of the thing to recall
+     * @return the value that was recalled
+     * @throws Error if nothing can be recalled.
+     */
+    Character.prototype.recall = function (key) {
+        if (!this.memory.has(key)) {
+            throw new Error(this.name + " does not recall anything about " + key);
+        }
+        return this.memory.get(key);
+    };
     Character.prototype.attemptsTo = function (action) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
