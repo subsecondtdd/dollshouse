@@ -2,7 +2,7 @@
   "name": "dollshouse",
   "version": "1.0.0",
   "description": "Sub-Second TDD Framework for Node.js",
-  "main": "dit/index.js",
+  "main": "dist/index.js",
   "repository": "git@github.com:subsecondtdd/dollshouse.git",
   "author": "Aslak Hellesøy",
   "license": "MIT",
