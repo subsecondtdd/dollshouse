@@ -43,7 +43,9 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
     private baseUrl: string
     private sessionStore: Store | MemoryStore
 
-    constructor(private readonly isDom: boolean, private readonly isHttp: boolean) {
+    constructor(private isDom: boolean, private isHttp: boolean) {
+      this.isDom = false
+      this.isHttp = false
     }
 
     async start() {

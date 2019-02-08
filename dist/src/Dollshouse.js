@@ -50,6 +50,8 @@ function dollshouse(options) {
             this.isHttp = isHttp;
             this.characters = new Map();
             this.stoppables = [];
+            this.isDom = false;
+            this.isHttp = false;
         }
         DollshouseImpl.prototype.start = function () {
             return __awaiter(this, void 0, void 0, function () {
