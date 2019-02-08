@@ -18,22 +18,24 @@ export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
   sessionSecret: string
 }
 
-export interface DollshouseConstructor<UserInfo, UserAgent> {
-  new(isDom: boolean, isHttp: boolean): Dollshouse<UserInfo, UserAgent>
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
+  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>
 
-  readonly prototype: Dollshouse<UserInfo, UserAgent>
+  readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
 }
 
-export interface Dollshouse<UserInfo, UserAgent> {
+export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
   start(): Promise<void>
 
   stop(): Promise<void>
 
+  context(modifyContext: (domainApi: DomainApi) => void): Promise<void>
+
   getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>>
 }
 
-export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<UserInfo, UserAgent> {
-  class DollshouseImpl implements Dollshouse<UserInfo, UserAgent> {
+export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
+  class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, UserAgent> {
     private readonly characters = new Map<string, Character<UserInfo, UserAgent>>()
     private readonly stoppables: Array<() => void> = []
 
@@ -67,6 +69,11 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
         await stoppable()
       }
     }
+
+    async context(modifyContext: (domainApi: DomainApi) => void): Promise<void> {
+      return modifyContext(this.domainApi)
+    }
+
 
     async getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)

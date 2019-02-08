@@ -15,8 +15,8 @@ import makeTestWebServer from "./makeTestWebServer"
 import Project from "./Project"
 
 describe('dollshouse', () => {
-  let TestHouse: DollshouseConstructor<TestUserInfo, TestUserAgent>
-  let house: Dollshouse<TestUserInfo, TestUserAgent>
+  let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestUserAgent>
+  let house: Dollshouse<TestDomainApi, TestUserInfo, TestUserAgent>
   let testDomainApi: TestDomainApi
 
   beforeEach(async () => {
@@ -66,9 +66,15 @@ describe('dollshouse', () => {
       it(`runs through ${name}`, async () => {
         house = new TestHouse(isDom, isHttp)
         await house.start()
+
+        // Given a project exists
+        await house.context((api: TestDomainApi) => api.createProject({userId: 'id-someone-else'}, 'Old Project'))
+
+        // Given aslak is logged in
         const aslak = await house.getCharacter('aslak')
         const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
         aslak.userInfo = userInfo
+
         await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
           await userAgent.createProject('Test Project')
           return userAgent
@@ -77,9 +83,14 @@ describe('dollshouse', () => {
         // TODO: Wait for version to synchronise
         await new Promise(resolve => setTimeout(resolve, 100))
 
-        const expectedProjects: Project[] = [{
-          projectName: 'Test Project'
-        }]
+        const expectedProjects: Project[] = [
+          {
+            projectName: 'Old Project'
+          },
+          {
+            projectName: 'Test Project'
+          }
+        ]
         assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
 
         const projects = await aslak.query((userAgent: TestUserAgent) => userAgent.getProjects())
