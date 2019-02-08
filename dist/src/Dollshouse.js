@@ -113,6 +113,13 @@ function dollshouse(options) {
                 });
             });
         };
+        DollshouseImpl.prototype.context = function (modifyContext) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, modifyContext(this.domainApi)];
+                });
+            });
+        };
         DollshouseImpl.prototype.getCharacter = function (characterName) {
             return __awaiter(this, void 0, void 0, function () {
                 var makeHttpOrDomainUserAgent, makeUserAgent, character;

@@ -11,13 +11,14 @@ export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
     makeSessionStore: () => Store | MemoryStore;
     sessionSecret: string;
 }
-export interface DollshouseConstructor<UserInfo, UserAgent> {
-    new (isDom: boolean, isHttp: boolean): Dollshouse<UserInfo, UserAgent>;
-    readonly prototype: Dollshouse<UserInfo, UserAgent>;
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
+    new (isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>;
+    readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>;
 }
-export interface Dollshouse<UserInfo, UserAgent> {
+export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
     start(): Promise<void>;
     stop(): Promise<void>;
+    context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
     getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>>;
 }
-export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<UserInfo, UserAgent>;
+export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent>;
