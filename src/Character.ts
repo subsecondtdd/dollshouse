@@ -8,7 +8,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
    */
   public userInfo: UserInfo
 
-  constructor(private readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
+  constructor(public readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
   }
 
   /**

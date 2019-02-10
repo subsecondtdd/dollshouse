@@ -1,5 +1,5 @@
 export default class Character<UserInfo = {}, UserAgent = {}> {
-    private readonly name;
+    readonly name: string;
     private readonly makeUserAgent;
     private readonly memory;
     private userAgent;
