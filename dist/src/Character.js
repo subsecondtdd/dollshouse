@@ -41,19 +41,6 @@ var Character = /** @class */ (function () {
         this.makeUserAgent = makeUserAgent;
         this.memory = new Map();
     }
-    Object.defineProperty(Character.prototype, "userInfo", {
-        /**
-         * Sets user info. This will be passed to the {@link makeUserAgent} function.
-         * This is typically used to asuthenticate the character's user agent.
-         *
-         * @param userInfo
-         */
-        set: function (userInfo) {
-            this._userInfo = userInfo;
-        },
-        enumerable: true,
-        configurable: true
-    });
     /**
      * Remember something
      *
@@ -84,7 +71,7 @@ var Character = /** @class */ (function () {
                     case 0:
                         if (!!this.userAgent) return [3 /*break*/, 2];
                         _a = this;
-                        return [4 /*yield*/, this.makeUserAgent(this._userInfo)];
+                        return [4 /*yield*/, this.makeUserAgent(this.userInfo)];
                     case 1:
                         _a.userAgent = _c.sent();
                         _c.label = 2;
@@ -101,6 +88,9 @@ var Character = /** @class */ (function () {
     Character.prototype.query = function (inspection) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                if (!this.userAgent) {
+                    throw new Error("No userAgent. Did the character attempt any actions?");
+                }
                 return [2 /*return*/, inspection(this.userAgent)];
             });
         });

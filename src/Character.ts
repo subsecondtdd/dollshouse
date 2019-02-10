@@ -1,19 +1,14 @@
 export default class Character<UserInfo = {}, UserAgent = {}> {
   private readonly memory = new Map<any, any>()
-  private _userInfo: UserInfo
   private userAgent: UserAgent
 
-  constructor(private readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
-  }
-
   /**
-   * Sets user info. This will be passed to the {@link makeUserAgent} function.
+   * User info for a character. This will be passed to the {@link makeUserAgent} function.
    * This is typically used to asuthenticate the character's user agent.
-   *
-   * @param userInfo
    */
-  set userInfo(userInfo: UserInfo) {
-    this._userInfo = userInfo
+  public userInfo: UserInfo
+
+  constructor(private readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
   }
 
   /**
@@ -42,12 +37,15 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
 
   async attemptsTo(action: (userAgent: UserAgent) => Promise<UserAgent>) {
     if (!this.userAgent) {
-      this.userAgent = await this.makeUserAgent(this._userInfo)
+      this.userAgent = await this.makeUserAgent(this.userInfo)
     }
     this.userAgent = await action(this.userAgent)
   }
 
   async query<T>(inspection: (userAgent: UserAgent) => T): Promise<T> {
+    if (!this.userAgent) {
+      throw new Error(`No userAgent. Did the character attempt any actions?`)
+    }
     return inspection(this.userAgent)
   }
 }
