@@ -31,7 +31,7 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
 
   context(modifyContext: (domainApi: DomainApi) => void): Promise<void>
 
-  getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>>
+  getCharacter(characterName: string): Character<UserInfo, UserAgent>
 }
 
 export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
@@ -48,7 +48,7 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
       this.isHttp = false
     }
 
-    async start() {
+    public async start() {
       this.domainApi = options.makeDomainApi()
 
       if (this.isHttp) {
@@ -66,18 +66,17 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
       }
     }
 
-    async stop() {
+    public async stop() {
       for (const stoppable of this.stoppables.reverse()) {
         await stoppable()
       }
     }
 
-    async context(modifyContext: (domainApi: DomainApi) => void): Promise<void> {
+    public async context(modifyContext: (domainApi: DomainApi) => void): Promise<void> {
       return modifyContext(this.domainApi)
     }
 
-
-    async getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>> {
+    public getCharacter(characterName: string): Character<UserInfo, UserAgent> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)
 
       const makeHttpOrDomainUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {

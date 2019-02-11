@@ -71,7 +71,7 @@ describe('dollshouse', () => {
         await house.context((api: TestDomainApi) => api.createProject({userId: 'id-someone-else'}, 'Old Project'))
 
         // Given aslak is logged in
-        const aslak = await house.getCharacter('aslak')
+        const aslak = house.getCharacter('aslak')
         const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
         aslak.userInfo = userInfo
 

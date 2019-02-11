@@ -123,62 +123,57 @@ function dollshouse(options) {
             });
         };
         DollshouseImpl.prototype.getCharacter = function (characterName) {
-            return __awaiter(this, void 0, void 0, function () {
-                var makeHttpOrDomainUserAgent, makeUserAgent, character;
-                var _this = this;
+            var _this = this;
+            if (this.characters.has(characterName))
+                return this.characters.get(characterName);
+            var makeHttpOrDomainUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
+                var cookie, session, sessionId, signed, clientCookie;
                 return __generator(this, function (_a) {
-                    if (this.characters.has(characterName))
-                        return [2 /*return*/, this.characters.get(characterName)];
-                    makeHttpOrDomainUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
-                        var cookie, session, sessionId, signed, clientCookie;
-                        return __generator(this, function (_a) {
-                            if (this.isHttp) {
-                                cookie = {
-                                    originalMaxAge: Number.MAX_SAFE_INTEGER,
-                                    maxAge: Number.MAX_SAFE_INTEGER,
-                                    path: "/",
-                                    httpOnly: true,
-                                    expires: false,
-                                };
-                                session = {
-                                    userInfo: userInfo,
-                                    cookie: cookie
-                                };
-                                sessionId = nanoid_1.default();
-                                this.sessionStore.set(sessionId, session);
-                                signed = 's:' + cookie_signature_1.default.sign(sessionId, options.sessionSecret);
-                                clientCookie = cookie_1.serialize(options.sessionCookieName, signed);
-                                return [2 /*return*/, options.makeHttpUserAgent(this.baseUrl, clientCookie)];
+                    if (this.isHttp) {
+                        cookie = {
+                            originalMaxAge: Number.MAX_SAFE_INTEGER,
+                            maxAge: Number.MAX_SAFE_INTEGER,
+                            path: "/",
+                            httpOnly: true,
+                            expires: false,
+                        };
+                        session = {
+                            userInfo: userInfo,
+                            cookie: cookie
+                        };
+                        sessionId = nanoid_1.default();
+                        this.sessionStore.set(sessionId, session);
+                        signed = 's:' + cookie_signature_1.default.sign(sessionId, options.sessionSecret);
+                        clientCookie = cookie_1.serialize(options.sessionCookieName, signed);
+                        return [2 /*return*/, options.makeHttpUserAgent(this.baseUrl, clientCookie)];
+                    }
+                    else {
+                        return [2 /*return*/, options.makeDomainUserAgent(this.domainApi, userInfo)];
+                    }
+                    return [2 /*return*/];
+                });
+            }); };
+            var makeUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
+                var userAgent, $characterNode;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, makeHttpOrDomainUserAgent(userInfo)];
+                        case 1:
+                            userAgent = _a.sent();
+                            if (this.isDom) {
+                                $characterNode = this.makeCharacterNode(characterName, true);
+                                return [2 /*return*/, options.makeDomUserAgent($characterNode, userAgent)];
                             }
                             else {
-                                return [2 /*return*/, options.makeDomainUserAgent(this.domainApi, userInfo)];
+                                return [2 /*return*/, userAgent];
                             }
                             return [2 /*return*/];
-                        });
-                    }); };
-                    makeUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
-                        var userAgent, $characterNode;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, makeHttpOrDomainUserAgent(userInfo)];
-                                case 1:
-                                    userAgent = _a.sent();
-                                    if (this.isDom) {
-                                        $characterNode = this.makeCharacterNode(characterName, true);
-                                        return [2 /*return*/, options.makeDomUserAgent($characterNode, userAgent)];
-                                    }
-                                    else {
-                                        return [2 /*return*/, userAgent];
-                                    }
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); };
-                    character = new Character_1.default(characterName, makeUserAgent);
-                    this.characters.set(characterName, character);
-                    return [2 /*return*/, character];
+                    }
                 });
-            });
+            }); };
+            var character = new Character_1.default(characterName, makeUserAgent);
+            this.characters.set(characterName, character);
+            return character;
         };
         DollshouseImpl.prototype.makeCharacterNode = function (characterName, keepDom) {
             var _this = this;

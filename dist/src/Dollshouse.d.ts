@@ -19,6 +19,6 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
     start(): Promise<void>;
     stop(): Promise<void>;
     context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
-    getCharacter(characterName: string): Promise<Character<UserInfo, UserAgent>>;
+    getCharacter(characterName: string): Character<UserInfo, UserAgent>;
 }
 export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent>;
