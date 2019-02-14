@@ -4,9 +4,10 @@ import Project from "./Project"
 export default class TestDomainApi {
   private projects: Project[] = []
 
-  createProject(userInfo: TestUserInfo, projectName: string) {
+  createProject(userInfo: TestUserInfo, projectName: string): void {
     if (!userInfo) throw new Error('createProject not allowed')
-    this.projects.push({projectName})
+    const project = {projectName}
+    this.projects.push(project)
   }
 
   getProjects(userInfo: TestUserInfo) {

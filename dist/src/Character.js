@@ -65,17 +65,22 @@ var Character = /** @class */ (function () {
     };
     Character.prototype.attemptsTo = function (action) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         if (!!this.userAgent) return [3 /*break*/, 2];
                         _a = this;
                         return [4 /*yield*/, this.makeUserAgent(this.userInfo)];
                     case 1:
-                        _a.userAgent = _b.sent();
-                        _b.label = 2;
-                    case 2: return [2 /*return*/, action(this.userAgent)];
+                        _a.userAgent = _c.sent();
+                        _c.label = 2;
+                    case 2:
+                        _b = this;
+                        return [4 /*yield*/, action(this.userAgent)];
+                    case 3:
+                        _b.viewModel = _c.sent();
+                        return [2 /*return*/];
                 }
             });
         });
@@ -83,10 +88,10 @@ var Character = /** @class */ (function () {
     Character.prototype.query = function (inspection) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                if (!this.userAgent) {
-                    throw new Error("No userAgent. Did the character attempt any actions?");
+                if (!this.viewModel) {
+                    throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
                 }
-                return [2 /*return*/, inspection(this.userAgent)];
+                return [2 /*return*/, inspection(this.viewModel)];
             });
         });
     };

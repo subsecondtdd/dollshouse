@@ -9,7 +9,7 @@ export default class HttpTestUserAgent implements TestUserAgent {
   ) {
   }
 
-  async createProject(projectName: string): Promise<TestUserAgent> {
+  async createProject(projectName: string): Promise<void> {
     const headers: HeadersInit = {
       "Content-Type": "application/json"
     }
@@ -28,7 +28,6 @@ export default class HttpTestUserAgent implements TestUserAgent {
       const errorMessage = await res.text()
       throw new Error(errorMessage)
     }
-    return this
   }
 
   async getProjects(): Promise<Project[]> {

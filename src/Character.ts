@@ -7,6 +7,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
    * This is typically used to asuthenticate the character's user agent.
    */
   public userInfo: UserInfo
+  private viewModel: any
 
   constructor(public readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
   }
@@ -35,17 +36,17 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
     return this.memory.get(key)
   }
 
-  async attemptsTo<T>(action: (userAgent: UserAgent) => Promise<T>) {
+  public async attemptsTo<T>(action: (userAgent: UserAgent) => Promise<any>): Promise<void> {
     if (!this.userAgent) {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
-    return action(this.userAgent)
+    this.viewModel = await action(this.userAgent)
   }
 
-  async query<T>(inspection: (userAgent: UserAgent) => T): Promise<T> {
-    if (!this.userAgent) {
-      throw new Error(`No userAgent. Did the character attempt any actions?`)
+  public async query<ViewModel,T>(inspection: (viewModel: ViewModel) => T): Promise<T> {
+    if (!this.viewModel) {
+      throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
     }
-    return inspection(this.userAgent)
+    return inspection(this.viewModel)
   }
 }

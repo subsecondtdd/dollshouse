@@ -10,10 +10,9 @@ export default class DomTestUserAgent implements TestUserAgent {
     ReactDOM.render(<TestApp userAgent={userAgent}/>, this.$characterNode)
   }
 
-  async createProject(projectName: string): Promise<TestUserAgent> {
+  async createProject(projectName: string): Promise<void> {
     const button = this.$characterNode.querySelector('button')
     ReactTestUtils.Simulate.click(button)
-    return this
   }
 
   async getProjects(): Promise<Project[]> {

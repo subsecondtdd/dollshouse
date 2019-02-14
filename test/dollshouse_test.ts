@@ -77,7 +77,7 @@ describe('dollshouse', () => {
 
         await aslak.attemptsTo(async userAgent => {
           await userAgent.createProject('Test Project')
-          return userAgent
+          return userAgent.getProjects()
         })
 
         // TODO: Wait for version to synchronise
@@ -93,7 +93,7 @@ describe('dollshouse', () => {
         ]
         assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
 
-        const projects = await aslak.query(userAgent => userAgent.getProjects())
+        const projects = await aslak.query<any, Project[]>(projects => projects)
         assert.deepStrictEqual(projects, expectedProjects)
       })
     })

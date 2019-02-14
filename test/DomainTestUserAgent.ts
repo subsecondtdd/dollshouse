@@ -10,9 +10,8 @@ export default class DomainTestUserAgent implements TestUserAgent {
   ) {
   }
 
-  async createProject(projectName: string) {
+  async createProject(projectName: string): Promise<void> {
     this.domainApi.createProject(this.userInfo, projectName)
-    return this
   }
 
   async getProjects(): Promise<Project[]> {

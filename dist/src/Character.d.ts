@@ -8,6 +8,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      * This is typically used to asuthenticate the character's user agent.
      */
     userInfo: UserInfo;
+    private viewModel;
     constructor(name: string, makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>);
     /**
      * Remember something
@@ -24,6 +25,6 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      * @throws Error if nothing can be recalled.
      */
     recall<T>(key: any): T;
-    attemptsTo<T>(action: (userAgent: UserAgent) => Promise<T>): Promise<T>;
-    query<T>(inspection: (userAgent: UserAgent) => T): Promise<T>;
+    attemptsTo<T>(action: (userAgent: UserAgent) => Promise<any>): Promise<void>;
+    query<ViewModel, T>(inspection: (viewModel: ViewModel) => T): Promise<T>;
 }

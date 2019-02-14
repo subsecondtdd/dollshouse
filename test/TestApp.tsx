@@ -7,18 +7,28 @@ interface Props {
   userAgent: TestUserAgent
 }
 
-const TestApp: React.FunctionComponent<Props> = ({userAgent: ua}) => {
+const TestApp: React.FunctionComponent<Props> = ({userAgent}) => {
 
-  const [userAgent, setUserAgent] = useState<TestUserAgent>(ua)
   const [projects, setProjects] = useState<Project[]>([])
 
   useEffect(() => {
-    userAgent.getProjects().then(setProjects)
-  })
+    fetchProjects()
+  }, [])
+
+  async function fetchProjects() {
+    try {
+      setProjects(await userAgent.getProjects())
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   async function createProject() {
-    const ua = await userAgent.createProject("Test Project")
-    setUserAgent(ua)
+    try {
+      await userAgent.createProject("Test Project")
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return <div>
