@@ -63,6 +63,11 @@ var Character = /** @class */ (function () {
         }
         return this.memory.get(key);
     };
+    /**
+     * Attempts to perform an action on behalf of the character.
+     *
+     * @param action a function that returns a new view model (which can be queried later).
+     */
     Character.prototype.attemptsTo = function (action) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -85,15 +90,16 @@ var Character = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Queries the view model. The view model is set by the last action.
+     *
+     * @param inspection a function that is passed the view model and returns a result derived from it.
+     */
     Character.prototype.query = function (inspection) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (!this.viewModel) {
-                    throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
-                }
-                return [2 /*return*/, inspection(this.viewModel)];
-            });
-        });
+        if (!this.viewModel) {
+            throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
+        }
+        return inspection(this.viewModel);
     };
     return Character;
 }());

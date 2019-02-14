@@ -36,14 +36,24 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
     return this.memory.get(key)
   }
 
-  public async attemptsTo<T>(action: (userAgent: UserAgent) => Promise<any>): Promise<void> {
+  /**
+   * Attempts to perform an action on behalf of the character.
+   *
+   * @param action a function that returns a new view model (which can be queried later).
+   */
+  public async attemptsTo<ViewModel>(action: (userAgent: UserAgent) => Promise<ViewModel>): Promise<void> {
     if (!this.userAgent) {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
     this.viewModel = await action(this.userAgent)
   }
 
-  public async query<ViewModel,T>(inspection: (viewModel: ViewModel) => T): Promise<T> {
+  /**
+   * Queries the view model. The view model is set by the last action.
+   *
+   * @param inspection a function that is passed the view model and returns a result derived from it.
+   */
+  public query<ViewModel, Result>(inspection: (viewModel: ViewModel) => Result): Result {
     if (!this.viewModel) {
       throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
     }

@@ -93,7 +93,7 @@ describe('dollshouse', () => {
         ]
         assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
 
-        const projects = await aslak.query<any, Project[]>(projects => projects)
+        const projects = aslak.query<any, Project[]>(projects => projects)
         assert.deepStrictEqual(projects, expectedProjects)
       })
     })

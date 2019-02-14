@@ -25,6 +25,16 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      * @throws Error if nothing can be recalled.
      */
     recall<T>(key: any): T;
-    attemptsTo<T>(action: (userAgent: UserAgent) => Promise<any>): Promise<void>;
-    query<ViewModel, T>(inspection: (viewModel: ViewModel) => T): Promise<T>;
+    /**
+     * Attempts to perform an action on behalf of the character.
+     *
+     * @param action a function that returns a new view model (which can be queried later).
+     */
+    attemptsTo<ViewModel>(action: (userAgent: UserAgent) => Promise<ViewModel>): Promise<void>;
+    /**
+     * Queries the view model. The view model is set by the last action.
+     *
+     * @param inspection a function that is passed the view model and returns a result derived from it.
+     */
+    query<ViewModel, Result>(inspection: (viewModel: ViewModel) => Result): Result;
 }
