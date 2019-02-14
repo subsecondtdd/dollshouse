@@ -75,7 +75,7 @@ describe('dollshouse', () => {
         const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
         aslak.userInfo = userInfo
 
-        await aslak.attemptsTo(async (userAgent: TestUserAgent): Promise<TestUserAgent> => {
+        await aslak.attemptsTo(async userAgent => {
           await userAgent.createProject('Test Project')
           return userAgent
         })
@@ -93,7 +93,7 @@ describe('dollshouse', () => {
         ]
         assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
 
-        const projects = await aslak.query((userAgent: TestUserAgent) => userAgent.getProjects())
+        const projects = await aslak.query(userAgent => userAgent.getProjects())
         assert.deepStrictEqual(projects, expectedProjects)
       })
     })

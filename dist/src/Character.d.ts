@@ -24,6 +24,6 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      * @throws Error if nothing can be recalled.
      */
     recall<T>(key: any): T;
-    attemptsTo(action: (userAgent: UserAgent) => Promise<UserAgent>): Promise<void>;
+    attemptsTo<T>(action: (userAgent: UserAgent) => Promise<T>): Promise<T>;
     query<T>(inspection: (userAgent: UserAgent) => T): Promise<T>;
 }

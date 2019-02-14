@@ -35,11 +35,11 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
     return this.memory.get(key)
   }
 
-  async attemptsTo(action: (userAgent: UserAgent) => Promise<UserAgent>) {
+  async attemptsTo<T>(action: (userAgent: UserAgent) => Promise<T>) {
     if (!this.userAgent) {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
-    this.userAgent = await action(this.userAgent)
+    return action(this.userAgent)
   }
 
   async query<T>(inspection: (userAgent: UserAgent) => T): Promise<T> {

@@ -65,22 +65,17 @@ var Character = /** @class */ (function () {
     };
     Character.prototype.attemptsTo = function (action) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         if (!!this.userAgent) return [3 /*break*/, 2];
                         _a = this;
                         return [4 /*yield*/, this.makeUserAgent(this.userInfo)];
                     case 1:
-                        _a.userAgent = _c.sent();
-                        _c.label = 2;
-                    case 2:
-                        _b = this;
-                        return [4 /*yield*/, action(this.userAgent)];
-                    case 3:
-                        _b.userAgent = _c.sent();
-                        return [2 /*return*/];
+                        _a.userAgent = _b.sent();
+                        _b.label = 2;
+                    case 2: return [2 /*return*/, action(this.userAgent)];
                 }
             });
         });
