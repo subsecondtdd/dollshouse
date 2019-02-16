@@ -4,7 +4,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
 
   /**
    * User info for a character. This will be passed to the {@link makeUserAgent} function.
-   * This is typically used to asuthenticate the character's user agent.
+   * This is typically used to authenticate the character's user agent.
    */
   public userInfo: UserInfo
   private viewModel: any
@@ -46,6 +46,9 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
     this.viewModel = await action(this.userAgent)
+    if(!this.viewModel) {
+      throw new Error(`action ${action} did not return a view model`)
+    }
   }
 
   /**

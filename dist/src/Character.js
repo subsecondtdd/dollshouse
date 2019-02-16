@@ -85,6 +85,9 @@ var Character = /** @class */ (function () {
                         return [4 /*yield*/, action(this.userAgent)];
                     case 3:
                         _b.viewModel = _c.sent();
+                        if (!this.viewModel) {
+                            throw new Error("action " + action + " did not return a view model");
+                        }
                         return [2 /*return*/];
                 }
             });

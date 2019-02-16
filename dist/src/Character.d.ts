@@ -5,7 +5,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
     private userAgent;
     /**
      * User info for a character. This will be passed to the {@link makeUserAgent} function.
-     * This is typically used to asuthenticate the character's user agent.
+     * This is typically used to authenticate the character's user agent.
      */
     userInfo: UserInfo;
     private viewModel;

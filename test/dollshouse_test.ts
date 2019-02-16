@@ -47,6 +47,8 @@ describe('dollshouse', () => {
   // dom-domain         t      f
   // http-domain        f      t
   // domain             f      f
+  //
+  // [UserAgent--ProtocolA]--ProtocolA Medium--[ProtocolA-1--UserAgent-ProtocolB]--ProtocolB-Medium--[...???
   const domConfig = [false, true]
   domConfig.forEach((isDom: boolean) => {
     const httpConfig = [false, true]
