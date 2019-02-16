@@ -36,6 +36,8 @@ export default class HttpTestUserAgent implements TestUserAgent {
       const errorMessage = await res.text()
       throw new Error(errorMessage)
     }
+
+    this.projects = await this.getProjects()
   }
 
   async getProjects(): Promise<Project[]> {

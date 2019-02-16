@@ -48,9 +48,7 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserA
     private baseUrl: string
     private sessionStore: Store | MemoryStore
 
-    constructor(private isDom: boolean, private isHttp: boolean) {
-      this.isDom = false
-      this.isHttp = false
+    constructor(private readonly isDom: boolean, private readonly isHttp: boolean) {
     }
 
     public async start() {
