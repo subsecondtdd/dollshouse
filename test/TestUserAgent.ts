@@ -1,7 +1,8 @@
-import Project from "./Project"
+import { IUserAgent } from "../src/Dollshouse"
+import TestViewModel from "./TestViewModel"
 
-export default interface TestUserAgent {
+export default interface TestUserAgent extends IUserAgent<TestViewModel> {
   createProject(projectName: string): Promise<void>
 
-  getProjects(): Promise<Project[]>
+  start(): Promise<void>
 }

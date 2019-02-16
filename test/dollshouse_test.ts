@@ -13,10 +13,11 @@ import TestDomainApi from "./TestDomainApi"
 import HttpTestUserAgent from "./HttpTestUserAgent"
 import makeTestWebServer from "./makeTestWebServer"
 import Project from "./Project"
+import TestViewModel from "./TestViewModel"
 
 describe('dollshouse', () => {
-  let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestUserAgent>
-  let house: Dollshouse<TestDomainApi, TestUserInfo, TestUserAgent>
+  let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestUserAgent, TestViewModel>
+  let house: Dollshouse<TestDomainApi, TestUserInfo, TestUserAgent, TestViewModel>
   let testDomainApi: TestDomainApi
 
   beforeEach(async () => {
@@ -77,9 +78,9 @@ describe('dollshouse', () => {
         const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
         aslak.userInfo = userInfo
 
-        await aslak.attemptsTo(async userAgent => {
+        await aslak.attemptsTo(async (userAgent: TestUserAgent) => {
+          await userAgent.start()
           await userAgent.createProject('Test Project')
-          return userAgent.getProjects()
         })
 
         // TODO: Wait for version to synchronise
@@ -95,7 +96,7 @@ describe('dollshouse', () => {
         ]
         assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
 
-        const projects = aslak.query<any, Project[]>(projects => projects)
+        const projects = aslak.query<Project[]>((viewModel: TestViewModel) => viewModel.projects)
         assert.deepStrictEqual(projects, expectedProjects)
       })
     })

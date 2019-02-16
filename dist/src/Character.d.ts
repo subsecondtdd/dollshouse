@@ -1,4 +1,5 @@
-export default class Character<UserInfo = {}, UserAgent = {}> {
+import { IUserAgent } from "./Dollshouse";
+export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
     readonly name: string;
     private readonly makeUserAgent;
     private readonly memory;
@@ -8,7 +9,6 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      * This is typically used to authenticate the character's user agent.
      */
     userInfo: UserInfo;
-    private viewModel;
     constructor(name: string, makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>);
     /**
      * Remember something
@@ -36,5 +36,5 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
-    query<ViewModel, Result>(inspection: (viewModel: ViewModel) => Result): Result;
+    query<Result>(inspection: (viewModel: ViewModel) => Result): Result;
 }

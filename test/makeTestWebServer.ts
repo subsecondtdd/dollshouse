@@ -29,7 +29,8 @@ export default async function makeTestWebServer(sessionCookieName: string, sessi
   app.get("/projects", asyncHandler(async (req, res) => {
     const userInfo: TestUserInfo = req.session.userInfo
     const userAgent = new DomainTestUserAgent(domainApi, userInfo)
-    const projects = await userAgent.getProjects()
+    await userAgent.start()
+    const projects = await userAgent.viewModel.projects
     res.json(projects).end()
   }))
 

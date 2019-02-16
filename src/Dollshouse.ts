@@ -18,25 +18,30 @@ export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
   sessionSecret: string
 }
 
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
-  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>
-
-  readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
+export interface IUserAgent<ViewModel> {
+  viewModel: ViewModel
 }
 
-export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
+  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent, ViewModel>
+
+  readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent, ViewModel>
+}
+
+export interface Dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
   start(): Promise<void>
 
   stop(): Promise<void>
 
   context(modifyContext: (domainApi: DomainApi) => void): Promise<void>
 
-  getCharacter(characterName: string): Character<UserInfo, UserAgent>
+  getCharacter(characterName: string): Character<UserInfo, UserAgent, ViewModel>
 }
 
-export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
-  class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, UserAgent> {
-    private readonly characters = new Map<string, Character<UserInfo, UserAgent>>()
+export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel>(
+  options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent, ViewModel> {
+  class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, UserAgent, ViewModel> {
+    private readonly characters = new Map<string, Character<UserInfo, UserAgent, ViewModel>>()
     private readonly stoppables: Array<() => void> = []
 
     private domainApi: DomainApi
@@ -76,7 +81,7 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
       return modifyContext(this.domainApi)
     }
 
-    public getCharacter(characterName: string): Character<UserInfo, UserAgent> {
+    public getCharacter(characterName: string): Character<UserInfo, UserAgent, ViewModel> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)
 
       const makeHttpOrDomainUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
@@ -115,7 +120,7 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: Doll
         }
       }
 
-      const character = new Character(characterName, makeUserAgent)
+      const character = new Character<UserInfo, UserAgent, ViewModel>(characterName, makeUserAgent)
       this.characters.set(characterName, character)
       return character
     }

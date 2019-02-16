@@ -12,12 +12,13 @@ const TestApp: React.FunctionComponent<Props> = ({userAgent}) => {
   const [projects, setProjects] = useState<Project[]>([])
 
   useEffect(() => {
-    fetchProjects()
+    start()
   }, [])
 
-  async function fetchProjects() {
+  async function start() {
     try {
-      setProjects(await userAgent.getProjects())
+      await userAgent.start()
+      setProjects(await userAgent.viewModel.projects)
     } catch (e) {
       console.error(e)
     }

@@ -1,4 +1,6 @@
-export default class Character<UserInfo = {}, UserAgent = {}> {
+import { IUserAgent } from "./Dollshouse"
+
+export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
   private readonly memory = new Map<any, any>()
   private userAgent: UserAgent
 
@@ -7,7 +9,6 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
    * This is typically used to authenticate the character's user agent.
    */
   public userInfo: UserInfo
-  private viewModel: any
 
   constructor(public readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
   }
@@ -45,10 +46,7 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
     if (!this.userAgent) {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
-    this.viewModel = await action(this.userAgent)
-    if(!this.viewModel) {
-      throw new Error(`action ${action} did not return a view model`)
-    }
+    await action(this.userAgent)
   }
 
   /**
@@ -56,10 +54,11 @@ export default class Character<UserInfo = {}, UserAgent = {}> {
    *
    * @param inspection a function that is passed the view model and returns a result derived from it.
    */
-  public query<ViewModel, Result>(inspection: (viewModel: ViewModel) => Result): Result {
-    if (!this.viewModel) {
+  public query<Result>(inspection: (viewModel: ViewModel) => Result): Result {
+    const vm = this.userAgent.viewModel
+    if (!vm) {
       throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
     }
-    return inspection(this.viewModel)
+    return inspection(vm)
   }
 }

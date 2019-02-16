@@ -1,5 +1,6 @@
 import TestUserAgent from "./TestUserAgent"
 import Project from "./Project"
+import TestViewModel from "./TestViewModel"
 
 export default class HttpTestUserAgent implements TestUserAgent {
   constructor(
@@ -7,6 +8,13 @@ export default class HttpTestUserAgent implements TestUserAgent {
     private readonly cookie: string,
     private readonly fetcher: GlobalFetch
   ) {
+  }
+
+  public viewModel: TestViewModel = this
+  public projects: Project[] = []
+
+  public async start(): Promise<void> {
+    this.projects = await this.getProjects()
   }
 
   async createProject(projectName: string): Promise<void> {
