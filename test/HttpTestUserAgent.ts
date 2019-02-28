@@ -1,6 +1,5 @@
 import TestUserAgent from "./TestUserAgent"
 import Project from "./Project"
-import TestViewModel from "./TestViewModel"
 
 export default class HttpTestUserAgent implements TestUserAgent {
   constructor(
@@ -10,7 +9,6 @@ export default class HttpTestUserAgent implements TestUserAgent {
   ) {
   }
 
-  public viewModel: TestViewModel = this
   public projects: Project[] = []
 
   public async start(): Promise<void> {

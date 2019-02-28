@@ -1,5 +1,4 @@
-import { IUserAgent } from "./Dollshouse";
-export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
+export default class Character<UserInfo, UserAgent> {
     readonly name: string;
     private readonly makeUserAgent;
     private readonly memory;
@@ -32,9 +31,9 @@ export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>
      */
     attemptsTo<ViewModel>(action: (userAgent: UserAgent) => Promise<ViewModel>): Promise<void>;
     /**
-     * Queries the view model. The view model is set by the last action.
+     * Queries the userAgent.
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
-    query<Result>(inspection: (viewModel: ViewModel) => Result): Result;
+    query<Result>(inspection: (userAgent: UserAgent) => Result): Result;
 }

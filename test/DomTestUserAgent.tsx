@@ -4,13 +4,10 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 import TestApp from "./TestApp"
 import * as React from "react"
 import Project from "./Project"
-import TestViewModel from "./TestViewModel"
 
 export default class DomTestUserAgent implements TestUserAgent {
   constructor(readonly $characterNode: HTMLElement, readonly userAgent: TestUserAgent) {
   }
-
-  public viewModel: TestViewModel = this
 
   public get projects(): Project[] {
     const projectNodes = this.$characterNode.querySelectorAll('.project')

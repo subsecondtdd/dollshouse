@@ -18,7 +18,7 @@ const TestApp: React.FunctionComponent<Props> = ({userAgent}) => {
   async function start() {
     try {
       await userAgent.start()
-      setProjects(await userAgent.viewModel.projects)
+      setProjects(await userAgent.projects)
     } catch (e) {
       console.error(e)
     }

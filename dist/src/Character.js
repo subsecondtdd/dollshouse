@@ -89,16 +89,15 @@ var Character = /** @class */ (function () {
         });
     };
     /**
-     * Queries the view model. The view model is set by the last action.
+     * Queries the userAgent.
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
     Character.prototype.query = function (inspection) {
-        var vm = this.userAgent.viewModel;
-        if (!vm) {
+        if (!this.userAgent) {
             throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
         }
-        return inspection(vm);
+        return inspection(this.userAgent);
     };
     return Character;
 }());

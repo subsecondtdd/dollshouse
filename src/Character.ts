@@ -1,6 +1,5 @@
-import { IUserAgent } from "./Dollshouse"
 
-export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>, ViewModel> {
+export default class Character<UserInfo, UserAgent> {
   private readonly memory = new Map<any, any>()
   private userAgent: UserAgent
 
@@ -50,15 +49,14 @@ export default class Character<UserInfo, UserAgent extends IUserAgent<ViewModel>
   }
 
   /**
-   * Queries the view model. The view model is set by the last action.
+   * Queries the userAgent.
    *
    * @param inspection a function that is passed the view model and returns a result derived from it.
    */
-  public query<Result>(inspection: (viewModel: ViewModel) => Result): Result {
-    const vm = this.userAgent.viewModel
-    if (!vm) {
+  public query<Result>(inspection: (userAgent: UserAgent) => Result): Result {
+    if (!this.userAgent) {
       throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
     }
-    return inspection(vm)
+    return inspection(this.userAgent)
   }
 }

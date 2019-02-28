@@ -30,7 +30,7 @@ export default async function makeTestWebServer(sessionCookieName: string, sessi
     const userInfo: TestUserInfo = req.session.userInfo
     const userAgent = new DomainTestUserAgent(domainApi, userInfo)
     await userAgent.start()
-    const projects = await userAgent.viewModel.projects
+    const projects = await userAgent.projects
     res.json(projects).end()
   }))
 
