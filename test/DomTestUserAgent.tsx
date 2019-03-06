@@ -26,4 +26,8 @@ export default class DomTestUserAgent implements TestUserAgent {
     const button = this.$characterNode.querySelector('button')
     ReactTestUtils.Simulate.click(button)
   }
+
+  async stop(): Promise<void> {
+    // no-op
+  }
 }

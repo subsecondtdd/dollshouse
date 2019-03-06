@@ -55,4 +55,8 @@ export default class HttpTestUserAgent implements TestUserAgent {
     }
     return await res.json()
   }
+
+  async stop(): Promise<void> {
+    // no-op
+  }
 }

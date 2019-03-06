@@ -153,20 +153,24 @@ function dollshouse(options) {
                 });
             }); };
             var makeUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
-                var userAgent, $characterNode;
+                var httpOrDomainUserAgent, userAgent, $characterNode;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4 /*yield*/, makeHttpOrDomainUserAgent(userInfo)];
                         case 1:
+                            httpOrDomainUserAgent = _a.sent();
+                            if (!this.isDom) return [3 /*break*/, 3];
+                            $characterNode = this.makeCharacterNode(characterName, true);
+                            return [4 /*yield*/, options.makeDomUserAgent($characterNode, httpOrDomainUserAgent)];
+                        case 2:
                             userAgent = _a.sent();
-                            if (this.isDom) {
-                                $characterNode = this.makeCharacterNode(characterName, true);
-                                return [2 /*return*/, options.makeDomUserAgent($characterNode, userAgent)];
-                            }
-                            else {
-                                return [2 /*return*/, userAgent];
-                            }
-                            return [2 /*return*/];
+                            return [3 /*break*/, 4];
+                        case 3:
+                            userAgent = httpOrDomainUserAgent;
+                            _a.label = 4;
+                        case 4:
+                            this.stoppables.push(userAgent.stop.bind(userAgent));
+                            return [2 /*return*/, userAgent];
                     }
                 });
             }); };

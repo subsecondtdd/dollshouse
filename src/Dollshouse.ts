@@ -18,7 +18,7 @@ export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
   sessionSecret: string
 }
 
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IUserAgent> {
   new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>
 
   readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
@@ -34,7 +34,11 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
   getCharacter(characterName: string): Character<UserInfo, UserAgent>
 }
 
-export default function dollshouse<DomainApi, UserInfo, UserAgent>(
+export interface IUserAgent {
+  stop(): Promise<void>
+}
+
+export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent>(
   options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
   class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, UserAgent> {
     private readonly characters = new Map<string, Character<UserInfo, UserAgent>>()
@@ -108,13 +112,16 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(
       }
 
       const makeUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
-        const userAgent = await makeHttpOrDomainUserAgent(userInfo)
+        const httpOrDomainUserAgent = await makeHttpOrDomainUserAgent(userInfo)
+        let userAgent: UserAgent
         if (this.isDom) {
           const $characterNode = this.makeCharacterNode(characterName, true)
-          return options.makeDomUserAgent($characterNode, userAgent)
+          userAgent = await options.makeDomUserAgent($characterNode, httpOrDomainUserAgent)
         } else {
-          return userAgent
+          userAgent = httpOrDomainUserAgent
         }
+        this.stoppables.push(userAgent.stop.bind(userAgent))
+        return userAgent
       }
 
       const character = new Character<UserInfo, UserAgent>(characterName, makeUserAgent)

@@ -12,7 +12,7 @@ export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
     makeSessionStore: () => Store | MemoryStore;
     sessionSecret: string;
 }
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IUserAgent> {
     new (isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>;
     readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>;
 }
@@ -22,4 +22,7 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
     context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
     getCharacter(characterName: string): Character<UserInfo, UserAgent>;
 }
-export default function dollshouse<DomainApi, UserInfo, UserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent>;
+export interface IUserAgent {
+    stop(): Promise<void>;
+}
+export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent>;
