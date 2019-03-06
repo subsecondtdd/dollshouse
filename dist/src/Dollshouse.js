@@ -69,11 +69,12 @@ function dollshouse(options) {
                         case 2:
                             _a.sent();
                             this.stoppables.push(function () { return __awaiter(_this, void 0, void 0, function () {
-                                var close;
+                                var stop, close;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            close = util_1.promisify(server_1.close.bind(server_1));
+                                            stop = server_1.stop || server_1.close;
+                                            close = util_1.promisify(stop.bind(server_1));
                                             return [4 /*yield*/, close()];
                                         case 1:
                                             _a.sent();

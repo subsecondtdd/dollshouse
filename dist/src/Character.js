@@ -66,7 +66,7 @@ var Character = /** @class */ (function () {
     /**
      * Attempts to perform an action on behalf of the character.
      *
-     * @param action a function that returns a new view model (which can be queried later).
+     * @param action a function that has a side-effect.
      */
     Character.prototype.attemptsTo = function (action) {
         return __awaiter(this, void 0, void 0, function () {

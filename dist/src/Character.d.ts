@@ -27,9 +27,9 @@ export default class Character<UserInfo, UserAgent> {
     /**
      * Attempts to perform an action on behalf of the character.
      *
-     * @param action a function that returns a new view model (which can be queried later).
+     * @param action a function that has a side-effect.
      */
-    attemptsTo<ViewModel>(action: (userAgent: UserAgent) => Promise<ViewModel>): Promise<void>;
+    attemptsTo(action: (userAgent: UserAgent) => Promise<void>): Promise<void>;
     /**
      * Queries the userAgent.
      *
