@@ -56,7 +56,10 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent>(
         const listen = promisify(server.listen.bind(server))
         await listen()
         this.stoppables.push(async () => {
-          const close = promisify(server.close.bind(server))
+          // If the server has a stop method (such as https://github.com/hunterloftis/stoppable) - use that
+          // @ts-ignore
+          const stop = server.stop || server.close
+          const close = promisify(stop.bind(server))
           await close()
         })
         const addr = server.address() as AddressInfo
