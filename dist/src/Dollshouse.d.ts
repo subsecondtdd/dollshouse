@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { MemoryStore, Store } from "express-session";
 import http from "http";
 import Character from "./Character";
