@@ -24,14 +24,14 @@ export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IC
   readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
 }
 
-export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
+export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
   start(): Promise<void>
 
   stop(): Promise<void>
 
   context(modifyContext: (domainApi: DomainApi) => void): Promise<void>
 
-  getCharacter(characterName: string): Character<UserInfo, UserAgent>
+  getCharacter(characterName: string): Character<UserInfo, CharacterAgent>
 }
 
 export interface ICharacterAgent {
@@ -111,7 +111,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
         }
       }
 
-      const makeUserAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
+      const makeCharacterAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
         const httpOrDomainCharacterAgent = await makeHttpOrDomainCharacterAgent(userInfo)
         let characterAgent: CharacterAgent
         if (this.isDom) {
@@ -124,7 +124,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
         return characterAgent
       }
 
-      const character = new Character<UserInfo, CharacterAgent>(characterName, makeUserAgent)
+      const character = new Character<UserInfo, CharacterAgent>(characterName, makeCharacterAgent)
       this.characters.set(characterName, character)
       return character
     }

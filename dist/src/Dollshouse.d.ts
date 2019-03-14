@@ -16,11 +16,11 @@ export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IC
     new (isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>;
     readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>;
 }
-export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
+export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
     start(): Promise<void>;
     stop(): Promise<void>;
     context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
-    getCharacter(characterName: string): Character<UserInfo, UserAgent>;
+    getCharacter(characterName: string): Character<UserInfo, CharacterAgent>;
 }
 export interface ICharacterAgent {
     stop(): Promise<void>;

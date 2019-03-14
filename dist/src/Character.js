@@ -36,9 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Character = /** @class */ (function () {
-    function Character(name, makeUserAgent) {
+    function Character(name, makeCharacterAgent) {
         this.name = name;
-        this.makeUserAgent = makeUserAgent;
+        this.makeCharacterAgent = makeCharacterAgent;
         this.memory = new Map();
     }
     /**
@@ -74,13 +74,13 @@ var Character = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (!!this.userAgent) return [3 /*break*/, 2];
+                        if (!!this.characterAgent) return [3 /*break*/, 2];
                         _a = this;
-                        return [4 /*yield*/, this.makeUserAgent(this.userInfo)];
+                        return [4 /*yield*/, this.makeCharacterAgent(this.userInfo)];
                     case 1:
-                        _a.userAgent = _b.sent();
+                        _a.characterAgent = _b.sent();
                         _b.label = 2;
-                    case 2: return [4 /*yield*/, action(this.userAgent)];
+                    case 2: return [4 /*yield*/, action(this.characterAgent)];
                     case 3:
                         _b.sent();
                         return [2 /*return*/];
@@ -89,15 +89,15 @@ var Character = /** @class */ (function () {
         });
     };
     /**
-     * Queries the userAgent.
+     * Queries the characterAgent.
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
     Character.prototype.query = function (inspection) {
-        if (!this.userAgent) {
+        if (!this.characterAgent) {
             throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
         }
-        return inspection(this.userAgent);
+        return inspection(this.characterAgent);
     };
     return Character;
 }());

@@ -10,13 +10,13 @@ export default class DomTestCharacterAgent implements TestCharacterAgent {
   constructor(readonly $characterNode: HTMLElement, readonly userAgent: TestUserAgent) {
   }
 
-  public get projects(): Project[] {
+  getProjectNames(): string[] {
     const projectNodes = this.$characterNode.querySelectorAll('.project')
-    return Array.from(projectNodes).map(($projectNode: HTMLElement) => {
-      return {
-        projectName: $projectNode.innerText
-      }
-    })
+    return Array.from(projectNodes).map(($projectNode: HTMLElement) => $projectNode.innerText)
+  }
+
+  public get projects(): Project[] {
+    return this.getProjectNames().map(projectName => ({projectName}))
   }
 
   async start(): Promise<void> {

@@ -7,27 +7,26 @@ import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
 import TestUserAgent from "./TestUserAgent"
 import TestUserInfo from "./TestUserInfo"
-import DomainTestUserAgent from "./DomainTestUserAgent"
+import DomainTestCharacterAgent from "./DomainTestCharacterAgent"
 import DomTestCharacterAgent from "./DomTestCharacterAgent"
 import TestDomainApi from "./TestDomainApi"
-import HttpTestUserAgent from "./HttpTestUserAgent"
+import HttpTestCharacterAgent from "./HttpTestCharacterAgent"
 import makeTestWebServer from "./makeTestWebServer"
 import Project from "./Project"
 import TestCharacterAgent from "./TestCharacterAgent"
-import UserAgentCharacterAgent from "./UserAgentCharacterAgent"
 
 describe('dollshouse', () => {
   let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestCharacterAgent>
-  let house: Dollshouse<TestDomainApi, TestUserInfo, TestUserAgent>
+  let house: Dollshouse<TestDomainApi, TestUserInfo, TestCharacterAgent>
   let testDomainApi: TestDomainApi
 
   beforeEach(async () => {
     testDomainApi = new TestDomainApi()
 
-    const options: DollshouseOptions<TestDomainApi, TestUserInfo, TestUserAgent> = {
+    const options: DollshouseOptions<TestDomainApi, TestUserInfo, TestCharacterAgent> = {
       makeDomainApi: () => testDomainApi,
-      makeDomainCharacterAgent: async (domainApi: TestDomainApi, userInfo: TestUserInfo) => new UserAgentCharacterAgent(new DomainTestUserAgent(domainApi, userInfo)),
-      makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new UserAgentCharacterAgent(new HttpTestUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)})),
+      makeDomainCharacterAgent: async (domainApi: TestDomainApi, userInfo: TestUserInfo) => new DomainTestCharacterAgent(domainApi, userInfo),
+      makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new HttpTestCharacterAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
       makeDomCharacterAgent: async ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestCharacterAgent($characterNode, userAgent),
       makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) =>
         makeTestWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi),
@@ -77,9 +76,9 @@ describe('dollshouse', () => {
         const userInfo: TestUserInfo = {userId: 'id-aslak-123'}
         aslak.userInfo = userInfo
 
-        await aslak.attemptsTo(async (userAgent: TestUserAgent) => {
-          await userAgent.start()
-          await userAgent.createProject('Test Project')
+        await aslak.attemptsTo(async (characterAgent: TestCharacterAgent) => {
+          await characterAgent.start()
+          await characterAgent.createProject('Test Project')
         })
 
         // TODO: Wait for version to synchronise

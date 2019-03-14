@@ -152,7 +152,7 @@ function dollshouse(options) {
                     return [2 /*return*/];
                 });
             }); };
-            var makeUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
+            var makeCharacterAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
                 var httpOrDomainCharacterAgent, characterAgent, $characterNode;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
@@ -174,7 +174,7 @@ function dollshouse(options) {
                     }
                 });
             }); };
-            var character = new Character_1.default(characterName, makeUserAgent);
+            var character = new Character_1.default(characterName, makeCharacterAgent);
             this.characters.set(characterName, character);
             return character;
         };
