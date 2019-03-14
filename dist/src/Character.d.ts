@@ -1,4 +1,4 @@
-export default class Character<UserInfo, UserAgent> {
+export default class Character<UserInfo, CharacterAgent> {
     readonly name: string;
     private readonly makeUserAgent;
     private readonly memory;
@@ -8,7 +8,7 @@ export default class Character<UserInfo, UserAgent> {
      * This is typically used to authenticate the character's user agent.
      */
     userInfo: UserInfo;
-    constructor(name: string, makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>);
+    constructor(name: string, makeUserAgent: (userInfo: UserInfo) => Promise<CharacterAgent>);
     /**
      * Remember something
      *
@@ -29,11 +29,11 @@ export default class Character<UserInfo, UserAgent> {
      *
      * @param action a function that has a side-effect.
      */
-    attemptsTo(action: (userAgent: UserAgent) => Promise<void>): Promise<void>;
+    attemptsTo(action: (userAgent: CharacterAgent) => Promise<void>): Promise<void>;
     /**
      * Queries the userAgent.
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
-    query<Result>(inspection: (userAgent: UserAgent) => Result): Result;
+    query<Result>(inspection: (userAgent: CharacterAgent) => Result): Result;
 }

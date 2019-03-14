@@ -4,8 +4,9 @@ import * as ReactTestUtils from 'react-dom/test-utils'
 import TestApp from "./TestApp"
 import * as React from "react"
 import Project from "./Project"
+import TestCharacterAgent from "./TestCharacterAgent"
 
-export default class DomTestUserAgent implements TestUserAgent {
+export default class DomTestCharacterAgent implements TestCharacterAgent {
   constructor(readonly $characterNode: HTMLElement, readonly userAgent: TestUserAgent) {
   }
 

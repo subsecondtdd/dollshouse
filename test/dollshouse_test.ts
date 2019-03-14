@@ -8,14 +8,16 @@ import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from
 import TestUserAgent from "./TestUserAgent"
 import TestUserInfo from "./TestUserInfo"
 import DomainTestUserAgent from "./DomainTestUserAgent"
-import DomTestUserAgent from "./DomTestUserAgent"
+import DomTestCharacterAgent from "./DomTestCharacterAgent"
 import TestDomainApi from "./TestDomainApi"
 import HttpTestUserAgent from "./HttpTestUserAgent"
 import makeTestWebServer from "./makeTestWebServer"
 import Project from "./Project"
+import TestCharacterAgent from "./TestCharacterAgent"
+import UserAgentCharacterAgent from "./UserAgentCharacterAgent"
 
 describe('dollshouse', () => {
-  let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestUserAgent>
+  let TestHouse: DollshouseConstructor<TestDomainApi, TestUserInfo, TestCharacterAgent>
   let house: Dollshouse<TestDomainApi, TestUserInfo, TestUserAgent>
   let testDomainApi: TestDomainApi
 
@@ -24,9 +26,9 @@ describe('dollshouse', () => {
 
     const options: DollshouseOptions<TestDomainApi, TestUserInfo, TestUserAgent> = {
       makeDomainApi: () => testDomainApi,
-      makeDomainUserAgent: async (domainApi: TestDomainApi, userInfo: TestUserInfo) => new DomainTestUserAgent(domainApi, userInfo),
-      makeHttpUserAgent: async (baseUrl: string, cookie: string) => new HttpTestUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
-      makeDomUserAgent: async ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestUserAgent($characterNode, userAgent),
+      makeDomainCharacterAgent: async (domainApi: TestDomainApi, userInfo: TestUserInfo) => new UserAgentCharacterAgent(new DomainTestUserAgent(domainApi, userInfo)),
+      makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new UserAgentCharacterAgent(new HttpTestUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)})),
+      makeDomCharacterAgent: async ($characterNode: HTMLElement, userAgent: TestUserAgent) => new DomTestCharacterAgent($characterNode, userAgent),
       makeHttpServer: async (domainApi: TestDomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) =>
         makeTestWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi),
       sessionCookieName: 'session-id',
@@ -48,7 +50,7 @@ describe('dollshouse', () => {
   // http-domain        f      t
   // domain             f      f
   //
-  // [UserAgent--ProtocolA]--ProtocolA Medium--[ProtocolA-1--UserAgent-ProtocolB]--ProtocolB-Medium--[...???
+  // [CharacterAgent--ProtocolA]--ProtocolA Medium--[ProtocolA-1--CharacterAgent-ProtocolB]--ProtocolB-Medium--[...???
   const domConfig = [false, true]
   domConfig.forEach((isDom: boolean) => {
     const httpConfig = [false, true]

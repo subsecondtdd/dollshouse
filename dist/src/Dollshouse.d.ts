@@ -2,17 +2,17 @@
 import { MemoryStore, Store } from "express-session";
 import http from "http";
 import Character from "./Character";
-export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
+export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
     makeDomainApi: () => DomainApi;
-    makeDomainUserAgent: (domainApi: DomainApi, userInfo: UserInfo) => Promise<UserAgent>;
-    makeHttpUserAgent: (baseUrl: string, cookie: string) => Promise<UserAgent>;
-    makeDomUserAgent: ($characterNode: HTMLElement, userAgent: UserAgent) => Promise<UserAgent>;
+    makeDomainCharacterAgent: (domainApi: DomainApi, userInfo: UserInfo) => Promise<CharacterAgent>;
+    makeHttpCharacterAgent: (baseUrl: string, cookie: string) => Promise<CharacterAgent>;
+    makeDomCharacterAgent: ($characterNode: HTMLElement, characterAgent: CharacterAgent) => Promise<CharacterAgent>;
     makeHttpServer: (domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) => Promise<http.Server>;
     sessionCookieName: string;
     makeSessionStore: () => Store | MemoryStore;
     sessionSecret: string;
 }
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IUserAgent> {
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends ICharacterAgent> {
     new (isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>;
     readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>;
 }
@@ -22,7 +22,7 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
     context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
     getCharacter(characterName: string): Character<UserInfo, UserAgent>;
 }
-export interface IUserAgent {
+export interface ICharacterAgent {
     stop(): Promise<void>;
 }
-export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent>(options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent>;
+export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent>(options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent>;

@@ -125,7 +125,7 @@ function dollshouse(options) {
             var _this = this;
             if (this.characters.has(characterName))
                 return this.characters.get(characterName);
-            var makeHttpOrDomainUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
+            var makeHttpOrDomainCharacterAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
                 var cookie, session, sessionId, signed, clientCookie;
                 return __generator(this, function (_a) {
                     if (this.isHttp) {
@@ -144,33 +144,33 @@ function dollshouse(options) {
                         this.sessionStore.set(sessionId, session);
                         signed = 's:' + cookie_signature_1.default.sign(sessionId, options.sessionSecret);
                         clientCookie = cookie_1.serialize(options.sessionCookieName, signed);
-                        return [2 /*return*/, options.makeHttpUserAgent(this.baseUrl, clientCookie)];
+                        return [2 /*return*/, options.makeHttpCharacterAgent(this.baseUrl, clientCookie)];
                     }
                     else {
-                        return [2 /*return*/, options.makeDomainUserAgent(this.domainApi, userInfo)];
+                        return [2 /*return*/, options.makeDomainCharacterAgent(this.domainApi, userInfo)];
                     }
                     return [2 /*return*/];
                 });
             }); };
             var makeUserAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
-                var httpOrDomainUserAgent, userAgent, $characterNode;
+                var httpOrDomainCharacterAgent, characterAgent, $characterNode;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, makeHttpOrDomainUserAgent(userInfo)];
+                        case 0: return [4 /*yield*/, makeHttpOrDomainCharacterAgent(userInfo)];
                         case 1:
-                            httpOrDomainUserAgent = _a.sent();
+                            httpOrDomainCharacterAgent = _a.sent();
                             if (!this.isDom) return [3 /*break*/, 3];
                             $characterNode = this.makeCharacterNode(characterName, true);
-                            return [4 /*yield*/, options.makeDomUserAgent($characterNode, httpOrDomainUserAgent)];
+                            return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
                         case 2:
-                            userAgent = _a.sent();
+                            characterAgent = _a.sent();
                             return [3 /*break*/, 4];
                         case 3:
-                            userAgent = httpOrDomainUserAgent;
+                            characterAgent = httpOrDomainCharacterAgent;
                             _a.label = 4;
                         case 4:
-                            this.stoppables.push(userAgent.stop.bind(userAgent));
-                            return [2 /*return*/, userAgent];
+                            this.stoppables.push(characterAgent.stop.bind(characterAgent));
+                            return [2 /*return*/, characterAgent];
                     }
                 });
             }); };

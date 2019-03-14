@@ -1,7 +1,7 @@
 
-export default class Character<UserInfo, UserAgent> {
+export default class Character<UserInfo, CharacterAgent> {
   private readonly memory = new Map<any, any>()
-  private userAgent: UserAgent
+  private userAgent: CharacterAgent
 
   /**
    * User info for a character. This will be passed to the {@link makeUserAgent} function.
@@ -9,7 +9,7 @@ export default class Character<UserInfo, UserAgent> {
    */
   public userInfo: UserInfo
 
-  constructor(public readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<UserAgent>) {
+  constructor(public readonly name: string, private readonly makeUserAgent: (userInfo: UserInfo) => Promise<CharacterAgent>) {
   }
 
   /**
@@ -41,7 +41,7 @@ export default class Character<UserInfo, UserAgent> {
    *
    * @param action a function that has a side-effect.
    */
-  public async attemptsTo(action: (userAgent: UserAgent) => Promise<void>): Promise<void> {
+  public async attemptsTo(action: (userAgent: CharacterAgent) => Promise<void>): Promise<void> {
     if (!this.userAgent) {
       this.userAgent = await this.makeUserAgent(this.userInfo)
     }
@@ -53,7 +53,7 @@ export default class Character<UserInfo, UserAgent> {
    *
    * @param inspection a function that is passed the view model and returns a result derived from it.
    */
-  public query<Result>(inspection: (userAgent: UserAgent) => Result): Result {
+  public query<Result>(inspection: (userAgent: CharacterAgent) => Result): Result {
     if (!this.userAgent) {
       throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
     }

@@ -7,18 +7,18 @@ import nanoid from "nanoid"
 import signature from "cookie-signature"
 import { serialize } from "cookie"
 
-export interface DollshouseOptions<DomainApi, UserInfo, UserAgent> {
+export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
   makeDomainApi: () => DomainApi,
-  makeDomainUserAgent: (domainApi: DomainApi, userInfo: UserInfo) => Promise<UserAgent>
-  makeHttpUserAgent: (baseUrl: string, cookie: string) => Promise<UserAgent>
-  makeDomUserAgent: ($characterNode: HTMLElement, userAgent: UserAgent) => Promise<UserAgent>
+  makeDomainCharacterAgent: (domainApi: DomainApi, userInfo: UserInfo) => Promise<CharacterAgent>
+  makeHttpCharacterAgent: (baseUrl: string, cookie: string) => Promise<CharacterAgent>
+  makeDomCharacterAgent: ($characterNode: HTMLElement, characterAgent: CharacterAgent) => Promise<CharacterAgent>
   makeHttpServer: (domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) => Promise<http.Server>
   sessionCookieName: string,
   makeSessionStore: () => Store | MemoryStore
   sessionSecret: string
 }
 
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends IUserAgent> {
+export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends ICharacterAgent> {
   new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>
 
   readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
@@ -34,14 +34,14 @@ export interface Dollshouse<DomainApi, UserInfo, UserAgent> {
   getCharacter(characterName: string): Character<UserInfo, UserAgent>
 }
 
-export interface IUserAgent {
+export interface ICharacterAgent {
   stop(): Promise<void>
 }
 
-export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserAgent>(
-  options: DollshouseOptions<DomainApi, UserInfo, UserAgent>): DollshouseConstructor<DomainApi, UserInfo, UserAgent> {
-  class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, UserAgent> {
-    private readonly characters = new Map<string, Character<UserInfo, UserAgent>>()
+export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent>(
+  options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent> {
+  class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, CharacterAgent> {
+    private readonly characters = new Map<string, Character<UserInfo, CharacterAgent>>()
     private readonly stoppables: Array<() => void> = []
 
     private domainApi: DomainApi
@@ -82,10 +82,10 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserA
       return modifyContext(this.domainApi)
     }
 
-    public getCharacter(characterName: string): Character<UserInfo, UserAgent> {
+    public getCharacter(characterName: string): Character<UserInfo, CharacterAgent> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)
 
-      const makeHttpOrDomainUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
+      const makeHttpOrDomainCharacterAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
         if (this.isHttp) {
           const cookie = {
             originalMaxAge: Number.MAX_SAFE_INTEGER,
@@ -105,26 +105,26 @@ export default function dollshouse<DomainApi, UserInfo, UserAgent extends IUserA
           // See express-session setcookie/getcookie
           const signed = 's:' + signature.sign(sessionId, options.sessionSecret)
           const clientCookie = serialize(options.sessionCookieName, signed)
-          return options.makeHttpUserAgent(this.baseUrl, clientCookie)
+          return options.makeHttpCharacterAgent(this.baseUrl, clientCookie)
         } else {
-          return options.makeDomainUserAgent(this.domainApi, userInfo)
+          return options.makeDomainCharacterAgent(this.domainApi, userInfo)
         }
       }
 
-      const makeUserAgent = async (userInfo: UserInfo): Promise<UserAgent> => {
-        const httpOrDomainUserAgent = await makeHttpOrDomainUserAgent(userInfo)
-        let userAgent: UserAgent
+      const makeUserAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
+        const httpOrDomainCharacterAgent = await makeHttpOrDomainCharacterAgent(userInfo)
+        let characterAgent: CharacterAgent
         if (this.isDom) {
           const $characterNode = this.makeCharacterNode(characterName, true)
-          userAgent = await options.makeDomUserAgent($characterNode, httpOrDomainUserAgent)
+          characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
         } else {
-          userAgent = httpOrDomainUserAgent
+          characterAgent = httpOrDomainCharacterAgent
         }
-        this.stoppables.push(userAgent.stop.bind(userAgent))
-        return userAgent
+        this.stoppables.push(characterAgent.stop.bind(characterAgent))
+        return characterAgent
       }
 
-      const character = new Character<UserInfo, UserAgent>(characterName, makeUserAgent)
+      const character = new Character<UserInfo, CharacterAgent>(characterName, makeUserAgent)
       this.characters.set(characterName, character)
       return character
     }
