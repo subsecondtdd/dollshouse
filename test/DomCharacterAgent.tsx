@@ -3,7 +3,6 @@ import ReactDOM from "react-dom"
 import * as ReactTestUtils from 'react-dom/test-utils'
 import App from "../testapp/App"
 import * as React from "react"
-import Project from "../testapp/Project"
 import CharacterAgent from "./CharacterAgent"
 
 export default class DomCharacterAgent implements CharacterAgent {
@@ -13,10 +12,6 @@ export default class DomCharacterAgent implements CharacterAgent {
   getProjectNames(): string[] {
     const projectNodes = this.$characterNode.querySelectorAll('.project')
     return Array.from(projectNodes).map(($projectNode: HTMLElement) => $projectNode.innerText)
-  }
-
-  public get projects(): Project[] {
-    throw new Error("Use getProjectNames() instead")
   }
 
   async start(): Promise<void> {

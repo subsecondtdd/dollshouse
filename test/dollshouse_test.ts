@@ -5,14 +5,14 @@ import nodeFetch from "node-fetch"
 import fetchCookie from "fetch-cookie"
 import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
-import UserAgent from "../testapp/UserAgent"
 import UserInfo from "../testapp/UserInfo"
-import DomainCharacterAgent from "./DomainCharacterAgent"
+import UserAgentCharacterAgent from "./UserAgentCharacterAgent"
 import DomCharacterAgent from "./DomCharacterAgent"
 import DomainApi from "../testapp/DomainApi"
-import HttpCharacterAgent from "./HttpCharacterAgent"
+import HttpUserAgent from "../testapp/HttpUserAgent"
 import makeHttpServer from "../testapp/makeHttpServer"
 import CharacterAgent from "./CharacterAgent"
+import DomainUserAgent from "../testapp/DomainUserAgent"
 
 describe('dollshouse', () => {
   let TestHouse: DollshouseConstructor<DomainApi, UserInfo, CharacterAgent>
@@ -24,9 +24,9 @@ describe('dollshouse', () => {
 
     const options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent> = {
       makeDomainApi: () => domainApi,
-      makeDomainCharacterAgent: async (domainApi: DomainApi, userInfo: UserInfo) => new DomainCharacterAgent(domainApi, userInfo),
-      makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new HttpCharacterAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
-      makeDomCharacterAgent: async ($characterNode: HTMLElement, userAgent: UserAgent) => new DomCharacterAgent($characterNode, userAgent),
+      makeDomainCharacterAgent: async (domainApi: DomainApi, userInfo: UserInfo) => new UserAgentCharacterAgent(new DomainUserAgent(domainApi, userInfo)),
+      makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new UserAgentCharacterAgent(new HttpUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)})),
+      makeDomCharacterAgent: async ($characterNode: HTMLElement, characterAgent: CharacterAgent) => new DomCharacterAgent($characterNode, characterAgent.userAgent),
       makeHttpServer,
       sessionCookieName: 'session-id',
       makeSessionStore: () => new MemoryStore(),
@@ -74,7 +74,7 @@ describe('dollshouse', () => {
 
         await aslak.attemptsTo(async (characterAgent: CharacterAgent) => {
           await characterAgent.start()
-          await characterAgent.createProject('Test Project')
+          await characterAgent.userAgent.createProject('Test Project')
         })
 
         // TODO: Wait for version to synchronise

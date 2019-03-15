@@ -18,10 +18,10 @@ export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
   sessionSecret: string
 }
 
-export interface DollshouseConstructor<DomainApi, UserInfo, UserAgent extends ICharacterAgent> {
-  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, UserAgent>
+export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent> {
+  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, CharacterAgent>
 
-  readonly prototype: Dollshouse<DomainApi, UserInfo, UserAgent>
+  readonly prototype: Dollshouse<DomainApi, UserInfo, CharacterAgent>
 }
 
 export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
