@@ -16,7 +16,7 @@ export default class DomTestCharacterAgent implements TestCharacterAgent {
   }
 
   public get projects(): Project[] {
-    return this.getProjectNames().map(projectName => ({projectName}))
+    throw new Error("Use getProjectNames() instead")
   }
 
   async start(): Promise<void> {

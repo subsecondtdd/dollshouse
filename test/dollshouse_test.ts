@@ -84,18 +84,12 @@ describe('dollshouse', () => {
         // TODO: Wait for version to synchronise
         await new Promise(resolve => setTimeout(resolve, 100))
 
-        const expectedProjects: Project[] = [
-          {
-            projectName: 'Old Project'
-          },
-          {
-            projectName: 'Test Project'
-          }
-        ]
-        assert.deepStrictEqual(testDomainApi.getProjects(userInfo), expectedProjects)
+        const actualProjectNames = testDomainApi.getProjects(userInfo).map(p => p.projectName)
+        const expectedProjectNames: string[] = ['Old Project','Test Project']
+        assert.deepStrictEqual(actualProjectNames, expectedProjectNames)
 
-        const projects = aslak.query<Project[]>((userAgent: TestUserAgent) => userAgent.projects)
-        assert.deepStrictEqual(projects, expectedProjects)
+        const projects = aslak.query<string[]>((characterAgent: TestCharacterAgent) => characterAgent.getProjectNames())
+        assert.deepStrictEqual(projects, expectedProjectNames)
       })
     })
   })
