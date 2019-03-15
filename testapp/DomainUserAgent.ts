@@ -1,11 +1,11 @@
 import UserAgent from "./UserAgent"
 import UserInfo from "./UserInfo"
-import TestDomainApi from "./DomainApi"
+import DomainApi from "./DomainApi"
 import Project from "./Project"
 
 export default class DomainUserAgent implements UserAgent {
   constructor(
-    private readonly domainApi: TestDomainApi,
+    private readonly domainApi: DomainApi,
     private readonly userInfo: UserInfo,
   ) {
   }

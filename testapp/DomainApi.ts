@@ -1,7 +1,7 @@
 import UserInfo from "./UserInfo"
 import Project from "./Project"
 
-export default class TestDomainApi {
+export default class DomainApi {
   private projects: Project[] = []
 
   createProject(userInfo: UserInfo, projectName: string): void {

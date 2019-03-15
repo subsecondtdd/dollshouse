@@ -44,7 +44,7 @@ var express_async_handler_1 = __importDefault(require("express-async-handler"));
 var DomainUserAgent_1 = __importDefault(require("./DomainUserAgent"));
 var http_1 = __importDefault(require("http"));
 var bodyParser = require("body-parser");
-function makeWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi) {
+function makeHttpServer(domainApi, sessionCookieName, sessionStore, sessionSecret) {
     return __awaiter(this, void 0, void 0, function () {
         var app;
         var _this = this;
@@ -96,5 +96,5 @@ function makeWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi
         });
     });
 }
-exports.default = makeWebServer;
-//# sourceMappingURL=makeWebServer.js.map
+exports.default = makeHttpServer;
+//# sourceMappingURL=makeHttpServer.js.map

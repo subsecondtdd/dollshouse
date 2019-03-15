@@ -11,7 +11,7 @@ import DomainCharacterAgent from "./DomainCharacterAgent"
 import DomCharacterAgent from "./DomCharacterAgent"
 import DomainApi from "../testapp/DomainApi"
 import HttpCharacterAgent from "./HttpCharacterAgent"
-import makeWebServer from "../testapp/makeWebServer"
+import makeHttpServer from "../testapp/makeHttpServer"
 import CharacterAgent from "./CharacterAgent"
 
 describe('dollshouse', () => {
@@ -27,12 +27,9 @@ describe('dollshouse', () => {
       makeDomainCharacterAgent: async (domainApi: DomainApi, userInfo: UserInfo) => new DomainCharacterAgent(domainApi, userInfo),
       makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new HttpCharacterAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)}),
       makeDomCharacterAgent: async ($characterNode: HTMLElement, userAgent: UserAgent) => new DomCharacterAgent($characterNode, userAgent),
-      makeHttpServer: async (domainApi: DomainApi, sessionCookieName: string, sessionStore: MemoryStore, sessionSecret: string) =>
-        makeWebServer(sessionCookieName, sessionSecret, sessionStore, domainApi),
+      makeHttpServer,
       sessionCookieName: 'session-id',
-      makeSessionStore(): MemoryStore {
-        return new MemoryStore()
-      },
+      makeSessionStore: () => new MemoryStore(),
       sessionSecret: 'keyboard cat'
     }
     TestHouse = dollshouse(options)

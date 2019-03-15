@@ -1,4 +1,4 @@
-import expressSession, { MemoryStore } from "express-session"
+import expressSession, { MemoryStore, Store } from "express-session"
 import DomainApi from "./DomainApi"
 import express from "express"
 import asyncHandler from "express-async-handler"
@@ -7,7 +7,7 @@ import DomainUserAgent from "./DomainUserAgent"
 import http from "http"
 import bodyParser = require("body-parser")
 
-export default async function makeWebServer(sessionCookieName: string, sessionSecret: string, sessionStore: MemoryStore, domainApi: DomainApi) {
+export default async function makeHttpServer(domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) {
   const app = express()
   app.use(expressSession({
     name: sessionCookieName,
