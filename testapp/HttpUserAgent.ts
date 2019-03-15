@@ -1,7 +1,7 @@
-import TestUserAgent from "./TestUserAgent"
+import UserAgent from "./UserAgent"
 import Project from "./Project"
 
-export default class HttpTestUserAgent implements TestUserAgent {
+export default class HttpUserAgent implements UserAgent {
   constructor(
     private readonly baseUrl: string,
     private readonly cookie: string,

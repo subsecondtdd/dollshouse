@@ -1,13 +1,13 @@
-import TestUserAgent from "./app/TestUserAgent"
+import UserAgent from "../testapp/UserAgent"
 import ReactDOM from "react-dom"
 import * as ReactTestUtils from 'react-dom/test-utils'
-import TestApp from "./app/TestApp"
+import App from "../testapp/App"
 import * as React from "react"
-import Project from "./app/Project"
-import TestCharacterAgent from "./TestCharacterAgent"
+import Project from "../testapp/Project"
+import CharacterAgent from "./CharacterAgent"
 
-export default class DomTestCharacterAgent implements TestCharacterAgent {
-  constructor(readonly $characterNode: HTMLElement, readonly userAgent: TestUserAgent) {
+export default class DomCharacterAgent implements CharacterAgent {
+  constructor(readonly $characterNode: HTMLElement, readonly userAgent: UserAgent) {
   }
 
   getProjectNames(): string[] {
@@ -20,7 +20,7 @@ export default class DomTestCharacterAgent implements TestCharacterAgent {
   }
 
   async start(): Promise<void> {
-    ReactDOM.render(<TestApp userAgent={this.userAgent}/>, this.$characterNode)
+    ReactDOM.render(<App userAgent={this.userAgent}/>, this.$characterNode)
   }
 
   async createProject(projectName: string): Promise<void> {

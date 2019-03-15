@@ -1,13 +1,13 @@
 import expressSession, { MemoryStore } from "express-session"
-import TestDomainApi from "./app/TestDomainApi"
+import DomainApi from "./DomainApi"
 import express from "express"
 import asyncHandler from "express-async-handler"
-import TestUserInfo from "./app/TestUserInfo"
-import DomainTestUserAgent from "./app/DomainTestUserAgent"
+import UserInfo from "./UserInfo"
+import DomainUserAgent from "./DomainUserAgent"
 import http from "http"
 import bodyParser = require("body-parser")
 
-export default async function makeTestWebServer(sessionCookieName: string, sessionSecret: string, sessionStore: MemoryStore, domainApi: TestDomainApi) {
+export default async function makeWebServer(sessionCookieName: string, sessionSecret: string, sessionStore: MemoryStore, domainApi: DomainApi) {
   const app = express()
   app.use(expressSession({
     name: sessionCookieName,
@@ -20,15 +20,15 @@ export default async function makeTestWebServer(sessionCookieName: string, sessi
 
   app.post("/projects", asyncHandler(async (req, res) => {
     const {projectName} = req.body
-    const userInfo: TestUserInfo = req.session.userInfo
-    const userAgent = new DomainTestUserAgent(domainApi, userInfo)
+    const userInfo: UserInfo = req.session.userInfo
+    const userAgent = new DomainUserAgent(domainApi, userInfo)
     await userAgent.createProject(projectName)
     res.end()
   }))
 
   app.get("/projects", asyncHandler(async (req, res) => {
-    const userInfo: TestUserInfo = req.session.userInfo
-    const userAgent = new DomainTestUserAgent(domainApi, userInfo)
+    const userInfo: UserInfo = req.session.userInfo
+    const userAgent = new DomainUserAgent(domainApi, userInfo)
     await userAgent.start()
     const projects = await userAgent.projects
     res.json(projects).end()

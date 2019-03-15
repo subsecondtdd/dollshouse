@@ -1,13 +1,13 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
-import TestUserAgent from "./TestUserAgent"
+import UserAgent from "./UserAgent"
 import Project from "./Project"
 
 interface Props {
-  userAgent: TestUserAgent
+  userAgent: UserAgent
 }
 
-const TestApp: React.FunctionComponent<Props> = ({userAgent}) => {
+const App: React.FunctionComponent<Props> = ({userAgent}) => {
 
   const [projects, setProjects] = useState<Project[]>([])
 
@@ -43,4 +43,4 @@ const TestApp: React.FunctionComponent<Props> = ({userAgent}) => {
   </div>
 }
 
-export default TestApp
+export default App

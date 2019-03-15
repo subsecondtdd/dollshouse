@@ -1,12 +1,12 @@
-import TestUserAgent from "./TestUserAgent"
-import TestUserInfo from "./TestUserInfo"
-import TestDomainApi from "./TestDomainApi"
+import UserAgent from "./UserAgent"
+import UserInfo from "./UserInfo"
+import TestDomainApi from "./DomainApi"
 import Project from "./Project"
 
-export default class DomainTestUserAgent implements TestUserAgent {
+export default class DomainUserAgent implements UserAgent {
   constructor(
     private readonly domainApi: TestDomainApi,
-    private readonly userInfo: TestUserInfo,
+    private readonly userInfo: UserInfo,
   ) {
   }
 
