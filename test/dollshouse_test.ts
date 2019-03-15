@@ -5,14 +5,13 @@ import nodeFetch from "node-fetch"
 import fetchCookie from "fetch-cookie"
 import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
-import TestUserAgent from "./TestUserAgent"
-import TestUserInfo from "./TestUserInfo"
+import TestUserAgent from "./app/TestUserAgent"
+import TestUserInfo from "./app/TestUserInfo"
 import DomainTestCharacterAgent from "./DomainTestCharacterAgent"
 import DomTestCharacterAgent from "./DomTestCharacterAgent"
-import TestDomainApi from "./TestDomainApi"
+import TestDomainApi from "./app/TestDomainApi"
 import HttpTestCharacterAgent from "./HttpTestCharacterAgent"
 import makeTestWebServer from "./makeTestWebServer"
-import Project from "./Project"
 import TestCharacterAgent from "./TestCharacterAgent"
 
 describe('dollshouse', () => {
@@ -85,7 +84,7 @@ describe('dollshouse', () => {
         await new Promise(resolve => setTimeout(resolve, 100))
 
         const actualProjectNames = testDomainApi.getProjects(userInfo).map(p => p.projectName)
-        const expectedProjectNames: string[] = ['Old Project','Test Project']
+        const expectedProjectNames: string[] = ['Old Project', 'Test Project']
         assert.deepStrictEqual(actualProjectNames, expectedProjectNames)
 
         const projects = aslak.query<string[]>((characterAgent: TestCharacterAgent) => characterAgent.getProjectNames())

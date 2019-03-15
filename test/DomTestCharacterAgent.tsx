@@ -1,9 +1,9 @@
-import TestUserAgent from "./TestUserAgent"
+import TestUserAgent from "./app/TestUserAgent"
 import ReactDOM from "react-dom"
 import * as ReactTestUtils from 'react-dom/test-utils'
-import TestApp from "./TestApp"
+import TestApp from "./app/TestApp"
 import * as React from "react"
-import Project from "./Project"
+import Project from "./app/Project"
 import TestCharacterAgent from "./TestCharacterAgent"
 
 export default class DomTestCharacterAgent implements TestCharacterAgent {

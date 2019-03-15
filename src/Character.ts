@@ -1,4 +1,3 @@
-
 export default class Character<UserInfo, CharacterAgent> {
   private readonly memory = new Map<any, any>()
   private characterAgent: CharacterAgent

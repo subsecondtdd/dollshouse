@@ -1,4 +1,4 @@
-import DomainTestUserAgent from "./DomainTestUserAgent"
+import DomainTestUserAgent from "./app/DomainTestUserAgent"
 import TestCharacterAgent from "./TestCharacterAgent"
 
 export default class DomainTestCharacterAgent extends DomainTestUserAgent implements TestCharacterAgent {

@@ -1,9 +1,9 @@
 import expressSession, { MemoryStore } from "express-session"
-import TestDomainApi from "./TestDomainApi"
+import TestDomainApi from "./app/TestDomainApi"
 import express from "express"
 import asyncHandler from "express-async-handler"
-import TestUserInfo from "./TestUserInfo"
-import DomainTestUserAgent from "./DomainTestUserAgent"
+import TestUserInfo from "./app/TestUserInfo"
+import DomainTestUserAgent from "./app/DomainTestUserAgent"
 import http from "http"
 import bodyParser = require("body-parser")
 
