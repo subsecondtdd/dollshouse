@@ -25,6 +25,8 @@ export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent exten
 }
 
 export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
+  domainApi: DomainApi
+
   start(): Promise<void>
 
   stop(): Promise<void>
