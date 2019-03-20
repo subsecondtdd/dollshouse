@@ -20,6 +20,7 @@ export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
     start(): Promise<void>;
     stop(): Promise<void>;
     context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
+    makeCharacterAgent(userInfo: UserInfo, characterName?: string): Promise<CharacterAgent>;
     getCharacter(characterName: string): Character<UserInfo, CharacterAgent>;
 }
 export interface ICharacterAgent {
