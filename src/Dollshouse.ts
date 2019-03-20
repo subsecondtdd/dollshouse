@@ -39,21 +39,21 @@ export interface ICharacterAgent {
 }
 
 export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent>(
-  options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent> {
+  options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>
+): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent> {
   class DollshouseImpl implements Dollshouse<DomainApi, UserInfo, CharacterAgent> {
     private readonly characters = new Map<string, Character<UserInfo, CharacterAgent>>()
     private readonly stoppables: Array<() => void> = []
-
-    private domainApi: DomainApi
     private baseUrl: string
     private sessionStore: Store | MemoryStore
 
+    public readonly domainApi: DomainApi
+
     constructor(private readonly isDom: boolean, private readonly isHttp: boolean) {
+      this.domainApi = options.makeDomainApi()
     }
 
     public async start() {
-      this.domainApi = options.makeDomainApi()
-
       if (this.isHttp) {
         this.sessionStore = options.makeSessionStore()
         const server = await options.makeHttpServer(this.domainApi, options.sessionCookieName, this.sessionStore, options.sessionSecret)
@@ -78,56 +78,65 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
       }
     }
 
+    /**
+     * Creates a new agent that can be used to interact with the system. This method can be called directly from
+     * unit testing tools like Mocha or Jest, but if you're using Cucumber, we recommend registering a parameter type
+     * that calls {@link getCharacter} instead.
+     *
+     * @param userInfo - the userInfo to use to identify a character.
+     * @param characterName - the name of the character (can be undefined unless you're using a DOM).
+     */
+    public async makeCharacterAgent(userInfo: UserInfo, characterName?: string): Promise<CharacterAgent> {
+      const httpOrDomainCharacterAgent = await this.makeHttpOrDomainCharacterAgent(userInfo)
+      let characterAgent: CharacterAgent
+      if (this.isDom) {
+        const $characterNode = this.makeCharacterNode(characterName, true)
+        characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
+      } else {
+        characterAgent = httpOrDomainCharacterAgent
+      }
+      this.stoppables.push(characterAgent.stop.bind(characterAgent))
+      return characterAgent
+    }
+
     public async context(modifyContext: (domainApi: DomainApi) => void): Promise<void> {
       return modifyContext(this.domainApi)
     }
 
     public getCharacter(characterName: string): Character<UserInfo, CharacterAgent> {
       if (this.characters.has(characterName)) return this.characters.get(characterName)
-
-      const makeHttpOrDomainCharacterAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
-        if (this.isHttp) {
-          const cookie = {
-            originalMaxAge: Number.MAX_SAFE_INTEGER,
-            maxAge: Number.MAX_SAFE_INTEGER,
-            path: "/",
-            httpOnly: true,
-            expires: false,
-          }
-          const session = {
-            userInfo,
-            cookie
-          }
-
-          const sessionId = nanoid()
-          this.sessionStore.set(sessionId, session)
-
-          // See express-session setcookie/getcookie
-          const signed = 's:' + signature.sign(sessionId, options.sessionSecret)
-          const clientCookie = serialize(options.sessionCookieName, signed)
-          return options.makeHttpCharacterAgent(this.baseUrl, clientCookie)
-        } else {
-          return options.makeDomainCharacterAgent(this.domainApi, userInfo)
-        }
-      }
-
-      const makeCharacterAgent = async (userInfo: UserInfo): Promise<CharacterAgent> => {
-        const httpOrDomainCharacterAgent = await makeHttpOrDomainCharacterAgent(userInfo)
-        let characterAgent: CharacterAgent
-        if (this.isDom) {
-          const $characterNode = this.makeCharacterNode(characterName, true)
-          characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
-        } else {
-          characterAgent = httpOrDomainCharacterAgent
-        }
-        this.stoppables.push(characterAgent.stop.bind(characterAgent))
-        return characterAgent
-      }
-
-      const character = new Character<UserInfo, CharacterAgent>(characterName, makeCharacterAgent)
+      const character = new Character<UserInfo, CharacterAgent>(characterName, this.makeCharacterAgent.bind(this))
       this.characters.set(characterName, character)
       return character
     }
+
+    private async makeHttpOrDomainCharacterAgent(userInfo: UserInfo): Promise<CharacterAgent> {
+      if (this.isHttp) {
+        const cookie = {
+          originalMaxAge: Number.MAX_SAFE_INTEGER,
+          maxAge: Number.MAX_SAFE_INTEGER,
+          path: "/",
+          httpOnly: true,
+          expires: false,
+        }
+        const session = {
+          userInfo,
+          cookie
+        }
+
+        const sessionId = nanoid()
+        this.sessionStore.set(sessionId, session)
+
+        // See express-session setcookie/getcookie
+        const signed = 's:' + signature.sign(sessionId, options.sessionSecret)
+        const clientCookie = serialize(options.sessionCookieName, signed)
+        return options.makeHttpCharacterAgent(this.baseUrl, clientCookie)
+      } else {
+        return options.makeDomainCharacterAgent(this.domainApi, userInfo)
+      }
+    }
+
+
 
     private makeCharacterNode(characterName: string, keepDom: boolean): HTMLElement {
       const loc = (typeof window === "object") ? window.location.href : undefined
