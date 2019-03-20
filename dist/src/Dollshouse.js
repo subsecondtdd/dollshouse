@@ -50,6 +50,7 @@ function dollshouse(options) {
             this.isHttp = isHttp;
             this.characters = new Map();
             this.stoppables = [];
+            this.domainApi = options.makeDomainApi();
         }
         DollshouseImpl.prototype.start = function () {
             return __awaiter(this, void 0, void 0, function () {
@@ -58,7 +59,6 @@ function dollshouse(options) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            this.domainApi = options.makeDomainApi();
                             if (!this.isHttp) return [3 /*break*/, 3];
                             this.sessionStore = options.makeSessionStore();
                             return [4 /*yield*/, options.makeHttpServer(this.domainApi, options.sessionCookieName, this.sessionStore, options.sessionSecret)];
@@ -114,6 +114,38 @@ function dollshouse(options) {
                 });
             });
         };
+        /**
+         * Creates a new agent that can be used to interact with the system. This method can be called directly from
+         * unit testing tools like Mocha or Jest, but if you're using Cucumber, we recommend registering a parameter type
+         * that calls {@link getCharacter} instead.
+         *
+         * @param userInfo - the userInfo to use to identify a character.
+         * @param characterName - the name of the character (can be undefined unless you're using a DOM).
+         */
+        DollshouseImpl.prototype.makeCharacterAgent = function (userInfo, characterName) {
+            return __awaiter(this, void 0, void 0, function () {
+                var httpOrDomainCharacterAgent, characterAgent, $characterNode;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.makeHttpOrDomainCharacterAgent(userInfo)];
+                        case 1:
+                            httpOrDomainCharacterAgent = _a.sent();
+                            if (!this.isDom) return [3 /*break*/, 3];
+                            $characterNode = this.makeCharacterNode(characterName, true);
+                            return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
+                        case 2:
+                            characterAgent = _a.sent();
+                            return [3 /*break*/, 4];
+                        case 3:
+                            characterAgent = httpOrDomainCharacterAgent;
+                            _a.label = 4;
+                        case 4:
+                            this.stoppables.push(characterAgent.stop.bind(characterAgent));
+                            return [2 /*return*/, characterAgent];
+                    }
+                });
+            });
+        };
         DollshouseImpl.prototype.context = function (modifyContext) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
@@ -122,10 +154,14 @@ function dollshouse(options) {
             });
         };
         DollshouseImpl.prototype.getCharacter = function (characterName) {
-            var _this = this;
             if (this.characters.has(characterName))
                 return this.characters.get(characterName);
-            var makeHttpOrDomainCharacterAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
+            var character = new Character_1.default(characterName, this.makeCharacterAgent.bind(this));
+            this.characters.set(characterName, character);
+            return character;
+        };
+        DollshouseImpl.prototype.makeHttpOrDomainCharacterAgent = function (userInfo) {
+            return __awaiter(this, void 0, void 0, function () {
                 var cookie, session, sessionId, signed, clientCookie;
                 return __generator(this, function (_a) {
                     if (this.isHttp) {
@@ -151,32 +187,7 @@ function dollshouse(options) {
                     }
                     return [2 /*return*/];
                 });
-            }); };
-            var makeCharacterAgent = function (userInfo) { return __awaiter(_this, void 0, void 0, function () {
-                var httpOrDomainCharacterAgent, characterAgent, $characterNode;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, makeHttpOrDomainCharacterAgent(userInfo)];
-                        case 1:
-                            httpOrDomainCharacterAgent = _a.sent();
-                            if (!this.isDom) return [3 /*break*/, 3];
-                            $characterNode = this.makeCharacterNode(characterName, true);
-                            return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
-                        case 2:
-                            characterAgent = _a.sent();
-                            return [3 /*break*/, 4];
-                        case 3:
-                            characterAgent = httpOrDomainCharacterAgent;
-                            _a.label = 4;
-                        case 4:
-                            this.stoppables.push(characterAgent.stop.bind(characterAgent));
-                            return [2 /*return*/, characterAgent];
-                    }
-                });
-            }); };
-            var character = new Character_1.default(characterName, makeCharacterAgent);
-            this.characters.set(characterName, character);
-            return character;
+            });
         };
         DollshouseImpl.prototype.makeCharacterNode = function (characterName, keepDom) {
             var _this = this;
