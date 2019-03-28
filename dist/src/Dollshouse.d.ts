@@ -12,8 +12,12 @@ export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
     makeSessionStore: () => Store | MemoryStore;
     sessionSecret: string;
 }
+interface Configuration {
+    dom: boolean;
+    http: boolean;
+}
 export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent> {
-    new (isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, CharacterAgent>;
+    new (configuration: Configuration): Dollshouse<DomainApi, UserInfo, CharacterAgent>;
     readonly prototype: Dollshouse<DomainApi, UserInfo, CharacterAgent>;
 }
 export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
@@ -28,3 +32,4 @@ export interface ICharacterAgent {
     stop(): Promise<void>;
 }
 export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent>(options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent>;
+export {};

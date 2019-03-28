@@ -45,9 +45,8 @@ var cookie_signature_1 = __importDefault(require("cookie-signature"));
 var cookie_1 = require("cookie");
 function dollshouse(options) {
     var DollshouseImpl = /** @class */ (function () {
-        function DollshouseImpl(isDom, isHttp) {
-            this.isDom = isDom;
-            this.isHttp = isHttp;
+        function DollshouseImpl(configuration) {
+            this.configuration = configuration;
             this.characters = new Map();
             this.stoppables = [];
             this.domainApi = options.makeDomainApi();
@@ -59,7 +58,7 @@ function dollshouse(options) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (!this.isHttp) return [3 /*break*/, 3];
+                            if (!this.configuration.http) return [3 /*break*/, 3];
                             this.sessionStore = options.makeSessionStore();
                             return [4 /*yield*/, options.makeHttpServer(this.domainApi, options.sessionCookieName, this.sessionStore, options.sessionSecret)];
                         case 1:
@@ -130,7 +129,7 @@ function dollshouse(options) {
                         case 0: return [4 /*yield*/, this.makeHttpOrDomainCharacterAgent(userInfo)];
                         case 1:
                             httpOrDomainCharacterAgent = _a.sent();
-                            if (!this.isDom) return [3 /*break*/, 3];
+                            if (!this.configuration.dom) return [3 /*break*/, 3];
                             $characterNode = this.makeCharacterNode(characterName, true);
                             return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
                         case 2:
@@ -164,7 +163,7 @@ function dollshouse(options) {
             return __awaiter(this, void 0, void 0, function () {
                 var cookie, session, sessionId, signed, clientCookie;
                 return __generator(this, function (_a) {
-                    if (this.isHttp) {
+                    if (this.configuration.http) {
                         cookie = {
                             originalMaxAge: Number.MAX_SAFE_INTEGER,
                             maxAge: Number.MAX_SAFE_INTEGER,
