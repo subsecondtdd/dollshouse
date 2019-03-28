@@ -18,8 +18,13 @@ export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
   sessionSecret: string
 }
 
+interface Configuration {
+  dom: boolean,
+  http: boolean
+}
+
 export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent> {
-  new(isDom: boolean, isHttp: boolean): Dollshouse<DomainApi, UserInfo, CharacterAgent>
+  new(configuration: Configuration): Dollshouse<DomainApi, UserInfo, CharacterAgent>
 
   readonly prototype: Dollshouse<DomainApi, UserInfo, CharacterAgent>
 }
@@ -53,12 +58,12 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
 
     public readonly domainApi: DomainApi
 
-    constructor(private readonly isDom: boolean, private readonly isHttp: boolean) {
+    constructor(private readonly configuration: Configuration) {
       this.domainApi = options.makeDomainApi()
     }
 
     public async start() {
-      if (this.isHttp) {
+      if (this.configuration.http) {
         this.sessionStore = options.makeSessionStore()
         const server = await options.makeHttpServer(this.domainApi, options.sessionCookieName, this.sessionStore, options.sessionSecret)
         const listen = promisify(server.listen.bind(server))
@@ -93,7 +98,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
     public async makeCharacterAgent(userInfo: UserInfo, characterName?: string): Promise<CharacterAgent> {
       const httpOrDomainCharacterAgent = await this.makeHttpOrDomainCharacterAgent(userInfo)
       let characterAgent: CharacterAgent
-      if (this.isDom) {
+      if (this.configuration.dom) {
         const $characterNode = this.makeCharacterNode(characterName, true)
         characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
       } else {
@@ -115,7 +120,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
     }
 
     private async makeHttpOrDomainCharacterAgent(userInfo: UserInfo): Promise<CharacterAgent> {
-      if (this.isHttp) {
+      if (this.configuration.http) {
         const cookie = {
           originalMaxAge: Number.MAX_SAFE_INTEGER,
           maxAge: Number.MAX_SAFE_INTEGER,

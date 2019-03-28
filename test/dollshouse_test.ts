@@ -47,21 +47,21 @@ describe('dollshouse', () => {
   //
   // [CharacterAgent--ProtocolA]--ProtocolA Medium--[ProtocolA-1--CharacterAgent-ProtocolB]--ProtocolB-Medium--[...???
   const domConfig = [false, true]
-  domConfig.forEach((isDom: boolean) => {
+  domConfig.forEach((dom: boolean) => {
     const httpConfig = [false, true]
-    httpConfig.forEach((isHttp: boolean) => {
+    httpConfig.forEach((http: boolean) => {
       const nameParts = []
-      if (isDom) {
+      if (dom) {
         nameParts.push('dom')
       }
-      if (isHttp) {
+      if (http) {
         nameParts.push('http')
       }
       nameParts.push('domain')
       const name = nameParts.join('-')
 
       it(`runs through ${name}`, async () => {
-        house = new TestHouse(isDom, isHttp)
+        house = new TestHouse({dom, http})
         await house.start()
 
         // Given a project exists
