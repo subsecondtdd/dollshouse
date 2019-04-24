@@ -3,7 +3,6 @@ import { MemoryStore } from "express-session"
 import nodeFetch from "node-fetch"
 // @ts-ignore
 import fetchCookie from "fetch-cookie"
-import http from "http"
 import dollshouse, { Dollshouse, DollshouseConstructor, DollshouseOptions } from "../src/Dollshouse"
 import UserInfo from "../testapp/UserInfo"
 import UserAgentCharacterAgent from "./UserAgentCharacterAgent"
@@ -24,7 +23,7 @@ describe('dollshouse', () => {
 
     const options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent> = {
       makeDomainApi: () => domainApi,
-      makeDomainCharacterAgent: async (domainApi: DomainApi, userInfo: UserInfo) => new UserAgentCharacterAgent(new DomainUserAgent(domainApi, userInfo)),
+      makeDomainCharacterAgent: async (api: DomainApi, userInfo: UserInfo) => new UserAgentCharacterAgent(new DomainUserAgent(api, userInfo)),
       makeHttpCharacterAgent: async (baseUrl: string, cookie: string) => new UserAgentCharacterAgent(new HttpUserAgent(baseUrl, cookie, {fetch: fetchCookie(nodeFetch)})),
       makeDomCharacterAgent: async ($characterNode: HTMLElement, characterAgent: CharacterAgent) => new DomCharacterAgent($characterNode, characterAgent.userAgent),
       makeHttpServer,
