@@ -30,15 +30,11 @@ export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent exten
 }
 
 export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
-  domainApi: DomainApi
-
   start(): Promise<void>
 
   stop(): Promise<void>
 
   context(modifyContext: (domainApi: DomainApi) => void): Promise<void>
-
-  makeCharacterAgent(userInfo: UserInfo, characterName?: string): Promise<CharacterAgent>
 
   getCharacter(characterName: string): Character<UserInfo, CharacterAgent>
 }
@@ -56,7 +52,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
     private baseUrl: string
     private sessionStore: Store | MemoryStore
 
-    public readonly domainApi: DomainApi
+    private readonly domainApi: DomainApi
 
     constructor(private readonly configuration: Configuration) {
       this.domainApi = options.makeDomainApi()
@@ -108,12 +104,12 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
       return characterAgent
     }
 
-    public async context(modifyContext: (domainApi: DomainApi) => void): Promise<void> {
+    public async context<T>(modifyContext: (domainApi: DomainApi) => T): Promise<T> {
       return modifyContext(this.domainApi)
     }
 
     public getCharacter(characterName: string): Character<UserInfo, CharacterAgent> {
-      if (this.characters.has(characterName)) return this.characters.get(characterName)
+      if (this.characters.has(characterName)) { return this.characters.get(characterName) }
       const character = new Character<UserInfo, CharacterAgent>(characterName, this.makeCharacterAgent.bind(this))
       this.characters.set(characterName, character)
       return character

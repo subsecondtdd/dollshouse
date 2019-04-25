@@ -153,8 +153,9 @@ function dollshouse(options) {
             });
         };
         DollshouseImpl.prototype.getCharacter = function (characterName) {
-            if (this.characters.has(characterName))
+            if (this.characters.has(characterName)) {
                 return this.characters.get(characterName);
+            }
             var character = new Character_1.default(characterName, this.makeCharacterAgent.bind(this));
             this.characters.set(characterName, character);
             return character;
