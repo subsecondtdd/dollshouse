@@ -23,10 +23,11 @@ export interface DollshouseConstructor<DomainApi, UserInfo, CharacterAgent exten
 export interface Dollshouse<DomainApi, UserInfo, CharacterAgent> {
     start(): Promise<void>;
     stop(): Promise<void>;
-    context(modifyContext: (domainApi: DomainApi) => void): Promise<void>;
+    context<T>(modifyContext: (domainApi: DomainApi) => T): Promise<T>;
     getCharacter(characterName: string): Character<UserInfo, CharacterAgent>;
 }
 export interface ICharacterAgent {
+    start(): Promise<void>;
     stop(): Promise<void>;
 }
 export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends ICharacterAgent>(options: DollshouseOptions<DomainApi, UserInfo, CharacterAgent>): DollshouseConstructor<DomainApi, UserInfo, CharacterAgent>;

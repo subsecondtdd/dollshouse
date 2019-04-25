@@ -138,7 +138,9 @@ function dollshouse(options) {
                         case 3:
                             characterAgent = httpOrDomainCharacterAgent;
                             _a.label = 4;
-                        case 4:
+                        case 4: return [4 /*yield*/, characterAgent.start()];
+                        case 5:
+                            _a.sent();
                             this.stoppables.push(characterAgent.stop.bind(characterAgent));
                             return [2 /*return*/, characterAgent];
                     }
