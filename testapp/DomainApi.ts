@@ -1,17 +1,26 @@
 import UserInfo from "./UserInfo"
 import Project from "./Project"
+import nanoid from "nanoid"
+import { EventEmitter } from "events"
 
-export default class DomainApi {
-  private projects: Project[] = []
+export default class DomainApi extends EventEmitter {
+  private projects = new Map<string, Project>()
 
-  createProject(userInfo: UserInfo, projectName: string): void {
-    if (!userInfo) throw new Error('createProject not allowed')
+  public createProject(userInfo: UserInfo, projectName: string): string {
+    if (!userInfo) {
+      throw new Error('createProject not allowed')
+    }
     const project = {projectName}
-    this.projects.push(project)
+    const id = nanoid()
+    this.projects.set(id, project)
+    this.emit("projects")
+    return id
   }
 
-  getProjects(userInfo: UserInfo) {
-    if (!userInfo) throw new Error('getProjects not allowed')
-    return this.projects
+  public getProjects(userInfo: UserInfo): Project[] {
+    if (!userInfo) {
+      throw new Error('getProjects not allowed')
+    }
+    return Array.from(this.projects.values())
   }
 }

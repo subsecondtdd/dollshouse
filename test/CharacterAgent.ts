@@ -4,5 +4,5 @@ import UserAgent from "../testapp/UserAgent"
 export default interface CharacterAgent extends ICharacterAgent {
   userAgent: UserAgent
 
-  getProjectNames(): string[]
+  readonly projectNames: string[]
 }

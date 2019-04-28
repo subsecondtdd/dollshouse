@@ -8,7 +8,10 @@ export default class Character<UserInfo, CharacterAgent> {
    */
   public userInfo: UserInfo
 
-  constructor(public readonly name: string, private readonly makeCharacterAgent: (userInfo: UserInfo) => Promise<CharacterAgent>) {
+  constructor(
+    public readonly name: string,
+    private readonly makeCharacterAgent: (userInfo: UserInfo) => Promise<CharacterAgent>
+  ) {
   }
 
   /**
@@ -40,21 +43,23 @@ export default class Character<UserInfo, CharacterAgent> {
    *
    * @param action a function that has a side-effect.
    */
-  public async attemptsTo(action: (characterAgent: CharacterAgent) => Promise<void>): Promise<void> {
+  public async attemptsTo<T>(action: (characterAgent: CharacterAgent) => Promise<T>): Promise<T> {
     if (!this.characterAgent) {
       this.characterAgent = await this.makeCharacterAgent(this.userInfo)
     }
-    await action(this.characterAgent)
+    return action(this.characterAgent)
   }
 
   /**
-   * Queries the characterAgent.
+   * Queries the characterAgent. This should ideally be a synchronous operation. The agent should be
+   * in a "settled" state by the time this is called (the "settlement" should happen in the previous
+   * attemptsTo call(s)).
    *
    * @param inspection a function that is passed the view model and returns a result derived from it.
    */
   public query<Result>(inspection: (characterAgent: CharacterAgent) => Result): Result {
     if (!this.characterAgent) {
-      throw new Error(`No viewModel. [${this.name}] must attemptTo an action first`)
+      throw new Error(`No viewModel. Character "${this.name}" must attemptTo an action first`)
     }
     return inspection(this.characterAgent)
   }

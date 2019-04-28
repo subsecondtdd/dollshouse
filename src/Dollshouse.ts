@@ -96,7 +96,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
       const httpOrDomainCharacterAgent = await this.makeHttpOrDomainCharacterAgent(userInfo)
       let characterAgent: CharacterAgent
       if (this.configuration.dom) {
-        const $characterNode = this.makeCharacterNode(characterName, true)
+        const $characterNode = this.makeCharacterNode(characterName, false)
         characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
       } else {
         characterAgent = httpOrDomainCharacterAgent
@@ -142,8 +142,6 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
         return options.makeDomainCharacterAgent(this.domainApi, userInfo)
       }
     }
-
-
 
     private makeCharacterNode(characterName: string, keepDom: boolean): HTMLElement {
       const loc = (typeof window === "object") ? window.location.href : undefined
@@ -232,9 +230,9 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
         </style>
         <div class="container">
           <div class="top">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
+            <span class="dot"/>
+            <span class="dot"/>
+            <span class="dot"/>
             <span class="character">${characterName}</span>
           </div>
         
@@ -249,9 +247,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
 
       document.body.appendChild(div)
       if (!keepDom) {
-        this.stoppables.push(async () => {
-          div.remove()
-        })
+        this.stoppables.push(() => div.remove())
       }
 
       const htmlElement = div.querySelector('.content') as HTMLElement

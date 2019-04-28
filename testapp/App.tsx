@@ -1,5 +1,4 @@
-import * as React from "react"
-import { useEffect, useState } from "react"
+import React from "react"
 import UserAgent from "./UserAgent"
 import Project from "./Project"
 
@@ -9,27 +8,32 @@ interface Props {
 
 const App: React.FunctionComponent<Props> = ({userAgent}) => {
 
-  const [projects, setProjects] = useState<Project[]>([])
+  const [projects, setProjects] = React.useState<Project[]>([])
+  const [error, setError] = React.useState<Error>(null)
 
-  useEffect(() => {
-    start()
+  React.useEffect(() => {
+    userAgent.on("open", updateProjects)
+    userAgent.on("projects", updateProjects)
+    userAgent.on("error", evt => setError(new Error("User agent error")))
+    userAgent.start().catch((err: Error) => setError(err))
+
+    return () => {
+      userAgent.stop().catch((err: Error) => setError(err))
+      userAgent.off("error", evt => setError(new Error("User agent error")))
+      userAgent.off("projects", updateProjects)
+      userAgent.off("open", updateProjects)
+    }
   }, [])
 
-  async function start() {
-    try {
-      await userAgent.start()
-      setProjects(await userAgent.projects)
-    } catch (e) {
-      console.error(e)
-    }
+  function updateProjects() {
+    userAgent.getProjects()
+      .then(setProjects)
+      .catch(setError)
   }
 
-  async function createProject() {
-    try {
-      await userAgent.createProject("Test Project")
-    } catch (e) {
-      console.error(e)
-    }
+  function createProject() {
+    userAgent.createProject("Test Project")
+      .catch(setError)
   }
 
   return <div>

@@ -5,9 +5,17 @@ import asyncHandler from "express-async-handler"
 import UserInfo from "./UserInfo"
 import DomainUserAgent from "./DomainUserAgent"
 import http from "http"
-import bodyParser = require("body-parser")
+import bodyParser from "body-parser"
+// @ts-ignore
+import SseStream from "ssestream"
+import { PassThrough } from "stream"
 
-export default async function makeHttpServer(domainApi: DomainApi, sessionCookieName: string, sessionStore: Store | MemoryStore, sessionSecret: string) {
+export default async function makeHttpServer(
+  domainApi: DomainApi,
+  sessionCookieName: string,
+  sessionStore: Store | MemoryStore,
+  sessionSecret: string
+) {
   const app = express()
   app.use(expressSession({
     name: sessionCookieName,
@@ -22,17 +30,36 @@ export default async function makeHttpServer(domainApi: DomainApi, sessionCookie
     const {projectName} = req.body
     const userInfo: UserInfo = req.session.userInfo
     const userAgent = new DomainUserAgent(domainApi, userInfo)
-    await userAgent.createProject(projectName)
-    res.end()
+    const id = await userAgent.createProject(projectName)
+    res.end(id)
   }))
 
   app.get("/projects", asyncHandler(async (req, res) => {
     const userInfo: UserInfo = req.session.userInfo
     const userAgent = new DomainUserAgent(domainApi, userInfo)
-    await userAgent.start()
-    const projects = await userAgent.projects
+    const projects = await userAgent.getProjects()
     res.json(projects).end()
   }))
+
+  app.get("/sse", (req, res) => {
+    const sse = new SseStream(req)
+
+    const notifications = new PassThrough({objectMode: true})
+    const userInfo: UserInfo = req.session.userInfo
+    const userAgent = new DomainUserAgent(domainApi, userInfo)
+    userAgent.start().catch(err => {
+      console.error(err)
+      res.status(500).end()
+    })
+
+    userAgent.on("projects", () => notifications.write({event: "projects", data: "x"}))
+    notifications.pipe(sse).pipe(res)
+
+    req.on("close", () => {
+      notifications.unpipe(sse)
+      userAgent.stop().catch(err => console.error(err))
+    })
+  })
 
   return http.createServer(app)
 }
