@@ -29,9 +29,11 @@ export default class Character<UserInfo, CharacterAgent> {
      *
      * @param action a function that has a side-effect.
      */
-    attemptsTo(action: (characterAgent: CharacterAgent) => Promise<void>): Promise<void>;
+    attemptsTo<T>(action: (characterAgent: CharacterAgent) => Promise<T>): Promise<T>;
     /**
-     * Queries the characterAgent.
+     * Queries the characterAgent. This should ideally be a synchronous operation. The agent should be
+     * in a "settled" state by the time this is called (the "settlement" should happen in the previous
+     * attemptsTo call(s)).
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */

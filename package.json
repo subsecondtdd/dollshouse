@@ -7,7 +7,7 @@
   "author": "Aslak Hellesøy",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && copyfiles src/*.html dist/",
     "test": "electron-mocha --renderer --recursive --require ts-node/register 'test/**/*.ts'"
   },
   "devDependencies": {
@@ -19,6 +19,7 @@
     "@types/react": "^16.8.8",
     "@types/react-dom": "^16.8.3",
     "body-parser": "^1.19.0",
+    "copyfiles": "^2.1.0",
     "dom-testing-library": "^4.0.0",
     "electron": "^4.1.0",
     "electron-mocha": "^6.0.4",

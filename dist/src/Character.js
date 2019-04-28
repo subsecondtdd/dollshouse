@@ -80,22 +80,21 @@ var Character = /** @class */ (function () {
                     case 1:
                         _a.characterAgent = _b.sent();
                         _b.label = 2;
-                    case 2: return [4 /*yield*/, action(this.characterAgent)];
-                    case 3:
-                        _b.sent();
-                        return [2 /*return*/];
+                    case 2: return [2 /*return*/, action(this.characterAgent)];
                 }
             });
         });
     };
     /**
-     * Queries the characterAgent.
+     * Queries the characterAgent. This should ideally be a synchronous operation. The agent should be
+     * in a "settled" state by the time this is called (the "settlement" should happen in the previous
+     * attemptsTo call(s)).
      *
      * @param inspection a function that is passed the view model and returns a result derived from it.
      */
     Character.prototype.query = function (inspection) {
         if (!this.characterAgent) {
-            throw new Error("No viewModel. [" + this.name + "] must attemptTo an action first");
+            throw new Error("No viewModel. Character \"" + this.name + "\" must attemptTo an action first");
         }
         return inspection(this.characterAgent);
     };

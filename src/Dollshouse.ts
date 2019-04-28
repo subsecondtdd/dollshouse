@@ -6,6 +6,7 @@ import { AddressInfo } from "net"
 import nanoid from "nanoid"
 import signature from "cookie-signature"
 import { serialize } from "cookie"
+import fs from "fs"
 
 export interface DollshouseOptions<DomainApi, UserInfo, CharacterAgent> {
   makeDomainApi: () => DomainApi,
@@ -96,7 +97,7 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
       const httpOrDomainCharacterAgent = await this.makeHttpOrDomainCharacterAgent(userInfo)
       let characterAgent: CharacterAgent
       if (this.configuration.dom) {
-        const $characterNode = this.makeCharacterNode(characterName, false)
+        const $characterNode = await this.makeCharacterNode(characterName, false)
         characterAgent = await options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)
       } else {
         characterAgent = httpOrDomainCharacterAgent
@@ -143,118 +144,22 @@ export default function dollshouse<DomainApi, UserInfo, CharacterAgent extends I
       }
     }
 
-    private makeCharacterNode(characterName: string, keepDom: boolean): HTMLElement {
+    private async makeCharacterNode(characterName: string, keepDom: boolean): Promise<HTMLElement> {
       const loc = (typeof window === "object") ? window.location.href : undefined
 
       // Prevent previous scenario's URL from interfering
       window.history.pushState(undefined, undefined, loc)
       const div = document.createElement("div")
-      div.innerHTML = `
-        <style>
-        * {
-          box-sizing: border-box;
-        }
-        
-        .dot {
-          height: 12px;
-          width: 12px;
-          background-color: #bbb;
-          border-radius: 50%;
-          display: inline-block;
-        }
-        
-        .character {
-          float: right;
-          color: #777777;
-        }
-        
-        .container {
-          border: 3px solid #f1f1f1;
-          border-top-left-radius: 4px;
-          border-top-right-radius: 4px;
-          margin-bottom: 8px;
-        }
-        
-        .top {
-          padding: 10px;
-          background: #f1f1f1;
-          border-top-left-radius: 4px;
-          border-top-right-radius: 4px;
-        }
-        
-        .content {
-          padding: 10px;
-        }
-
-        .spinner {
-          width: 40px;
-          height: 40px;
-        
-          position: relative;
-          margin: 100px auto;
-        }
-        
-        .double-bounce1, .double-bounce2 {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          background-color: #333;
-          opacity: 0.6;
-          position: absolute;
-          top: 0;
-          left: 0;
-          
-          -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
-          animation: sk-bounce 2.0s infinite ease-in-out;
-        }
-        
-        .double-bounce2 {
-          -webkit-animation-delay: -1.0s;
-          animation-delay: -1.0s;
-        }
-        
-        @-webkit-keyframes sk-bounce {
-          0%, 100% { -webkit-transform: scale(0.0) }
-          50% { -webkit-transform: scale(1.0) }
-        }
-        
-        @keyframes sk-bounce {
-          0%, 100% { 
-            transform: scale(0.0);
-            -webkit-transform: scale(0.0);
-          } 50% { 
-            transform: scale(1.0);
-            -webkit-transform: scale(1.0);
-          }
-        }
-        </style>
-        <div class="container">
-          <div class="top">
-            <span class="dot"/>
-            <span class="dot"/>
-            <span class="dot"/>
-            <span class="character">${characterName}</span>
-          </div>
-        
-          <div class="content">
-            <div class="spinner">
-              <div class="double-bounce1"></div>
-              <div class="double-bounce2"></div>
-            </div>
-          </div>
-        </div>
-      `
+      div.innerHTML = await fs.promises.readFile(`${__dirname}/browser.html`, 'utf-8') as string
 
       document.body.appendChild(div)
       if (!keepDom) {
         this.stoppables.push(() => div.remove())
       }
 
-      const htmlElement = div.querySelector('.content') as HTMLElement
-      if (!htmlElement) {
-        throw new Error("No HTML Element?")
-      }
-      return htmlElement
+      div.querySelector('.title').innerHTML = characterName
+
+      return div.querySelector('.content') as HTMLElement
     }
 
   }

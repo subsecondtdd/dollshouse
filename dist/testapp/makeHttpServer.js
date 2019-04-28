@@ -43,7 +43,10 @@ var express_1 = __importDefault(require("express"));
 var express_async_handler_1 = __importDefault(require("express-async-handler"));
 var DomainUserAgent_1 = __importDefault(require("./DomainUserAgent"));
 var http_1 = __importDefault(require("http"));
-var bodyParser = require("body-parser");
+var body_parser_1 = __importDefault(require("body-parser"));
+// @ts-ignore
+var ssestream_1 = __importDefault(require("ssestream"));
+var stream_1 = require("stream");
 function makeHttpServer(domainApi, sessionCookieName, sessionStore, sessionSecret) {
     return __awaiter(this, void 0, void 0, function () {
         var app;
@@ -57,9 +60,9 @@ function makeHttpServer(domainApi, sessionCookieName, sessionStore, sessionSecre
                 resave: true,
                 saveUninitialized: true,
             }));
-            app.use(bodyParser.json());
+            app.use(body_parser_1.default.json());
             app.post("/projects", express_async_handler_1.default(function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                var projectName, userInfo, userAgent;
+                var projectName, userInfo, userAgent, id;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -68,8 +71,8 @@ function makeHttpServer(domainApi, sessionCookieName, sessionStore, sessionSecre
                             userAgent = new DomainUserAgent_1.default(domainApi, userInfo);
                             return [4 /*yield*/, userAgent.createProject(projectName)];
                         case 1:
-                            _a.sent();
-                            res.end();
+                            id = _a.sent();
+                            res.end(id);
                             return [2 /*return*/];
                     }
                 });
@@ -81,17 +84,30 @@ function makeHttpServer(domainApi, sessionCookieName, sessionStore, sessionSecre
                         case 0:
                             userInfo = req.session.userInfo;
                             userAgent = new DomainUserAgent_1.default(domainApi, userInfo);
-                            return [4 /*yield*/, userAgent.start()];
+                            return [4 /*yield*/, userAgent.getProjects()];
                         case 1:
-                            _a.sent();
-                            return [4 /*yield*/, userAgent.projects];
-                        case 2:
                             projects = _a.sent();
                             res.json(projects).end();
                             return [2 /*return*/];
                     }
                 });
             }); }));
+            app.get("/sse", function (req, res) {
+                var sse = new ssestream_1.default(req);
+                var notifications = new stream_1.PassThrough({ objectMode: true });
+                var userInfo = req.session.userInfo;
+                var userAgent = new DomainUserAgent_1.default(domainApi, userInfo);
+                userAgent.start().catch(function (err) {
+                    console.error(err);
+                    res.status(500).end();
+                });
+                userAgent.on("projects", function () { return notifications.write({ event: "projects", data: "x" }); });
+                notifications.pipe(sse).pipe(res);
+                req.on("close", function () {
+                    notifications.unpipe(sse);
+                    userAgent.stop().catch(function (err) { return console.error(err); });
+                });
+            });
             return [2 /*return*/, http_1.default.createServer(app)];
         });
     });

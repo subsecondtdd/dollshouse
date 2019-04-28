@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -35,39 +48,29 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var HttpUserAgent = /** @class */ (function () {
-    function HttpUserAgent(baseUrl, cookie, fetcher) {
-        this.baseUrl = baseUrl;
-        this.cookie = cookie;
-        this.fetcher = fetcher;
-        this.projects = [];
+var events_1 = require("events");
+var HttpUserAgent = /** @class */ (function (_super) {
+    __extends(HttpUserAgent, _super);
+    function HttpUserAgent(baseUrl, cookie, fetcher, makeEventSource) {
+        var _this = _super.call(this) || this;
+        _this.baseUrl = baseUrl;
+        _this.cookie = cookie;
+        _this.fetcher = fetcher;
+        _this.makeEventSource = makeEventSource;
+        _this.emitProjects = _this.emitProjects.bind(_this);
+        return _this;
     }
-    HttpUserAgent.prototype.start = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this;
-                        return [4 /*yield*/, this.getProjects()];
-                    case 1:
-                        _a.projects = _b.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
     HttpUserAgent.prototype.createProject = function (projectName) {
         return __awaiter(this, void 0, void 0, function () {
-            var headers, res, errorMessage, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var headers, res, errorMessage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         headers = {
                             "Content-Type": "application/json"
                         };
                         if (this.cookie) {
-                            headers["Cookie"] = this.cookie;
+                            headers.Cookie = this.cookie;
                         }
                         return [4 /*yield*/, this.fetcher.fetch(this.baseUrl + "/projects", {
                                 method: "POST",
@@ -77,18 +80,13 @@ var HttpUserAgent = /** @class */ (function () {
                                 headers: headers
                             })];
                     case 1:
-                        res = _b.sent();
+                        res = _a.sent();
                         if (!!res.ok) return [3 /*break*/, 3];
                         return [4 /*yield*/, res.text()];
                     case 2:
-                        errorMessage = _b.sent();
+                        errorMessage = _a.sent();
                         throw new Error(errorMessage);
-                    case 3:
-                        _a = this;
-                        return [4 /*yield*/, this.getProjects()];
-                    case 4:
-                        _a.projects = _b.sent();
-                        return [2 /*return*/];
+                    case 3: return [2 /*return*/, res.text()];
                 }
             });
         });
@@ -103,7 +101,7 @@ var HttpUserAgent = /** @class */ (function () {
                             "Content-Type": "application/json"
                         };
                         if (this.cookie) {
-                            headers["Cookie"] = this.cookie;
+                            headers.Cookie = this.cookie;
                         }
                         return [4 /*yield*/, this.fetcher.fetch(this.baseUrl + "/projects", {
                                 method: "GET",
@@ -116,20 +114,37 @@ var HttpUserAgent = /** @class */ (function () {
                     case 2:
                         errorMessage = _a.sent();
                         throw new Error(errorMessage);
-                    case 3: return [4 /*yield*/, res.json()];
-                    case 4: return [2 /*return*/, _a.sent()];
+                    case 3: return [2 /*return*/, res.json()];
                 }
+            });
+        });
+    };
+    HttpUserAgent.prototype.start = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                this.es = this.makeEventSource(this.baseUrl + "/sse", this.cookie);
+                this.es.onopen = function () { return _this.emit("open"); };
+                this.es.onerror = function (evt) { return _this.emit("error", evt.data); };
+                this.es.addEventListener("projects", this.emitProjects);
+                return [2 /*return*/];
             });
         });
     };
     HttpUserAgent.prototype.stop = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                this.es.removeEventListener("projects", this.emitProjects);
+                this.es.close();
+                this.es = null;
                 return [2 /*return*/];
             });
         });
     };
+    HttpUserAgent.prototype.emitProjects = function () {
+        this.emit("projects");
+    };
     return HttpUserAgent;
-}());
+}(events_1.EventEmitter));
 exports.default = HttpUserAgent;
 //# sourceMappingURL=HttpUserAgent.js.map

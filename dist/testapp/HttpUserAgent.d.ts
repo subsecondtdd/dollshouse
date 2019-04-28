@@ -1,13 +1,17 @@
+/// <reference types="node" />
 import UserAgent from "./UserAgent";
 import Project from "./Project";
-export default class HttpUserAgent implements UserAgent {
+import { EventEmitter } from "events";
+export default class HttpUserAgent extends EventEmitter implements UserAgent {
     private readonly baseUrl;
     private readonly cookie;
     private readonly fetcher;
-    constructor(baseUrl: string, cookie: string, fetcher: GlobalFetch);
-    projects: Project[];
-    start(): Promise<void>;
-    createProject(projectName: string): Promise<void>;
+    private readonly makeEventSource;
+    private es;
+    constructor(baseUrl: string, cookie: string, fetcher: GlobalFetch, makeEventSource: (baseUrl: string, cookie: string) => EventSource);
+    createProject(projectName: string): Promise<string>;
     getProjects(): Promise<Project[]>;
+    start(): Promise<void>;
     stop(): Promise<void>;
+    private emitProjects;
 }

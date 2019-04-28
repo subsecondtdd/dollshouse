@@ -43,6 +43,7 @@ var util_1 = require("util");
 var nanoid_1 = __importDefault(require("nanoid"));
 var cookie_signature_1 = __importDefault(require("cookie-signature"));
 var cookie_1 = require("cookie");
+var fs_1 = __importDefault(require("fs"));
 function dollshouse(options) {
     var DollshouseImpl = /** @class */ (function () {
         function DollshouseImpl(configuration) {
@@ -129,17 +130,19 @@ function dollshouse(options) {
                         case 0: return [4 /*yield*/, this.makeHttpOrDomainCharacterAgent(userInfo)];
                         case 1:
                             httpOrDomainCharacterAgent = _a.sent();
-                            if (!this.configuration.dom) return [3 /*break*/, 3];
-                            $characterNode = this.makeCharacterNode(characterName, true);
-                            return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
+                            if (!this.configuration.dom) return [3 /*break*/, 4];
+                            return [4 /*yield*/, this.makeCharacterNode(characterName, false)];
                         case 2:
-                            characterAgent = _a.sent();
-                            return [3 /*break*/, 4];
+                            $characterNode = _a.sent();
+                            return [4 /*yield*/, options.makeDomCharacterAgent($characterNode, httpOrDomainCharacterAgent)];
                         case 3:
+                            characterAgent = _a.sent();
+                            return [3 /*break*/, 5];
+                        case 4:
                             characterAgent = httpOrDomainCharacterAgent;
-                            _a.label = 4;
-                        case 4: return [4 /*yield*/, characterAgent.start()];
-                        case 5:
+                            _a.label = 5;
+                        case 5: return [4 /*yield*/, characterAgent.start()];
+                        case 6:
                             _a.sent();
                             this.stoppables.push(characterAgent.stop.bind(characterAgent));
                             return [2 /*return*/, characterAgent];
@@ -192,26 +195,28 @@ function dollshouse(options) {
             });
         };
         DollshouseImpl.prototype.makeCharacterNode = function (characterName, keepDom) {
-            var _this = this;
-            var loc = (typeof window === "object") ? window.location.href : undefined;
-            // Prevent previous scenario's URL from interfering
-            window.history.pushState(undefined, undefined, loc);
-            var div = document.createElement("div");
-            div.innerHTML = "\n        <style>\n        * {\n          box-sizing: border-box;\n        }\n        \n        .dot {\n          height: 12px;\n          width: 12px;\n          background-color: #bbb;\n          border-radius: 50%;\n          display: inline-block;\n        }\n        \n        .character {\n          float: right;\n          color: #777777;\n        }\n        \n        .container {\n          border: 3px solid #f1f1f1;\n          border-top-left-radius: 4px;\n          border-top-right-radius: 4px;\n          margin-bottom: 8px;\n        }\n        \n        .top {\n          padding: 10px;\n          background: #f1f1f1;\n          border-top-left-radius: 4px;\n          border-top-right-radius: 4px;\n        }\n        \n        .content {\n          padding: 10px;\n        }\n\n        .spinner {\n          width: 40px;\n          height: 40px;\n        \n          position: relative;\n          margin: 100px auto;\n        }\n        \n        .double-bounce1, .double-bounce2 {\n          width: 100%;\n          height: 100%;\n          border-radius: 50%;\n          background-color: #333;\n          opacity: 0.6;\n          position: absolute;\n          top: 0;\n          left: 0;\n          \n          -webkit-animation: sk-bounce 2.0s infinite ease-in-out;\n          animation: sk-bounce 2.0s infinite ease-in-out;\n        }\n        \n        .double-bounce2 {\n          -webkit-animation-delay: -1.0s;\n          animation-delay: -1.0s;\n        }\n        \n        @-webkit-keyframes sk-bounce {\n          0%, 100% { -webkit-transform: scale(0.0) }\n          50% { -webkit-transform: scale(1.0) }\n        }\n        \n        @keyframes sk-bounce {\n          0%, 100% { \n            transform: scale(0.0);\n            -webkit-transform: scale(0.0);\n          } 50% { \n            transform: scale(1.0);\n            -webkit-transform: scale(1.0);\n          }\n        }\n        </style>\n        <div class=\"container\">\n          <div class=\"top\">\n            <span class=\"dot\"></span>\n            <span class=\"dot\"></span>\n            <span class=\"dot\"></span>\n            <span class=\"character\">" + characterName + "</span>\n          </div>\n        \n          <div class=\"content\">\n            <div class=\"spinner\">\n              <div class=\"double-bounce1\"></div>\n              <div class=\"double-bounce2\"></div>\n            </div>\n          </div>\n        </div>\n      ";
-            document.body.appendChild(div);
-            if (!keepDom) {
-                this.stoppables.push(function () { return __awaiter(_this, void 0, void 0, function () {
-                    return __generator(this, function (_a) {
-                        div.remove();
-                        return [2 /*return*/];
-                    });
-                }); });
-            }
-            var htmlElement = div.querySelector('.content');
-            if (!htmlElement) {
-                throw new Error("No HTML Element?");
-            }
-            return htmlElement;
+            return __awaiter(this, void 0, void 0, function () {
+                var loc, div, _a;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            loc = (typeof window === "object") ? window.location.href : undefined;
+                            // Prevent previous scenario's URL from interfering
+                            window.history.pushState(undefined, undefined, loc);
+                            div = document.createElement("div");
+                            _a = div;
+                            return [4 /*yield*/, fs_1.default.promises.readFile(__dirname + "/browser.html", 'utf-8')];
+                        case 1:
+                            _a.innerHTML = (_b.sent());
+                            document.body.appendChild(div);
+                            if (!keepDom) {
+                                this.stoppables.push(function () { return div.remove(); });
+                            }
+                            div.querySelector('.title').innerHTML = characterName;
+                            return [2 /*return*/, div.querySelector('.content')];
+                    }
+                });
+            });
         };
         return DollshouseImpl;
     }());

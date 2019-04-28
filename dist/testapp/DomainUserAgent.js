@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -35,24 +48,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var DomainUserAgent = /** @class */ (function () {
+var events_1 = require("events");
+var DomainUserAgent = /** @class */ (function (_super) {
+    __extends(DomainUserAgent, _super);
     function DomainUserAgent(domainApi, userInfo) {
-        this.domainApi = domainApi;
-        this.userInfo = userInfo;
-        this.projects = [];
+        var _this = _super.call(this) || this;
+        _this.domainApi = domainApi;
+        _this.userInfo = userInfo;
+        _this.emitProjects = _this.emitProjects.bind(_this);
+        return _this;
     }
-    DomainUserAgent.prototype.start = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                this.projects = this.domainApi.getProjects(this.userInfo);
-                return [2 /*return*/];
-            });
-        });
-    };
     DomainUserAgent.prototype.createProject = function (projectName) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this.domainApi.createProject(this.userInfo, projectName);
+                return [2 /*return*/, this.domainApi.createProject(this.userInfo, projectName)];
+            });
+        });
+    };
+    DomainUserAgent.prototype.getProjects = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.domainApi.getProjects(this.userInfo)];
+            });
+        });
+    };
+    DomainUserAgent.prototype.start = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.domainApi.on("projects", this.emitProjects);
+                this.emit("open");
                 return [2 /*return*/];
             });
         });
@@ -60,11 +84,15 @@ var DomainUserAgent = /** @class */ (function () {
     DomainUserAgent.prototype.stop = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                this.domainApi.off("projects", this.emitProjects);
                 return [2 /*return*/];
             });
         });
     };
+    DomainUserAgent.prototype.emitProjects = function () {
+        this.emit("projects");
+    };
     return DomainUserAgent;
-}());
+}(events_1.EventEmitter));
 exports.default = DomainUserAgent;
 //# sourceMappingURL=DomainUserAgent.js.map
